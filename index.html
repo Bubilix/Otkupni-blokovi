@@ -1,0 +1,1360 @@
+<!doctype html>
+<html lang="hr">
+<head>
+<title>Otkupni blokovi Mrkvica</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* Layout: radna aplikacija — popis blokova lijevo, uređivač i obrazac desno; na mobitelu jedno ispod drugog */
+:root{
+  --bg:#f6f7f4; --surface:#ffffff; --sunk:#eef0eb; --fg:#1d221c; --muted:#5f685c; --line:#d9ddd4;
+  --accent:#a8650b; --accent-ink:#ffffff; --accent-soft:#f5e3c4;
+  --warn:#9a3412; --c-blue:#e4eefb;--c-blue-h:#cddff5;--c-green:#e3f2e4;--c-green-h:#cbe6cd;--c-yellow:#fdf4d2;--c-yellow-h:#f6e6a8;--warn-soft:#fde7dc; --ok:#2f6b3a; --ok-soft:#e1efe1;
+  --f-display:"Segoe UI Variable Display","Segoe UI",Bahnschrift,system-ui,sans-serif;
+  --f-body:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+  --f-mono:"Cascadia Mono",Consolas,ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141713; --surface:#1b1f1a; --sunk:#232821; --fg:#e7eae3; --muted:#9aa395; --line:#30362d;
+  --accent:#e9a23b; --accent-ink:#1a1407; --accent-soft:#3a2c14;
+  --warn:#f4a07a; --c-blue:#1a2738;--c-blue-h:#22344b;--c-green:#1a2e1f;--c-green-h:#234029;--c-yellow:#332c13;--c-yellow-h:#463c18;--warn-soft:#3a2016; --ok:#7fc08a; --ok-soft:#1e2e20; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141713; --surface:#1b1f1a; --sunk:#232821; --fg:#e7eae3; --muted:#9aa395; --line:#30362d;
+  --accent:#e9a23b; --accent-ink:#1a1407; --accent-soft:#3a2c14;
+  --warn:#f4a07a; --c-blue:#1a2738;--c-blue-h:#22344b;--c-green:#1a2e1f;--c-green-h:#234029;--c-yellow:#332c13;--c-yellow-h:#463c18;--warn-soft:#3a2016; --ok:#7fc08a; --ok-soft:#1e2e20; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+img{max-width:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;line-height:1.45}
+.wrap{max-width:1400px;margin:0 auto;padding-inline:16px;padding-block:20px 64px}
+header.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:10px 20px;margin-bottom:16px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,3.6vw,32px);margin:0;line-height:1.1;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:4px 0 0;font-size:13px}
+.banner{background:var(--warn-soft);border-radius:6px;padding:10px 12px;margin-bottom:14px;font-size:13px}
+.banner b{color:var(--warn)}
+.layout{display:grid;grid-template-columns:340px minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;min-width:0}
+.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);display:flex;flex-direction:column;max-height:calc(100vh - 32px)}
+@media (max-width:900px){.side{position:static;max-height:none}}
+.side-head{padding:12px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.side-head .row{display:flex;gap:8px}
+.side-head .row select{flex:1}
+.list{overflow-y:auto;flex:1;min-height:120px}
+@media (max-width:900px){.list{max-height:46vh}}
+.item{display:grid;grid-template-columns:auto 1fr auto;gap:2px 10px;padding:9px 12px;border-bottom:1px solid var(--line);cursor:pointer;background:none;border-left:3px solid transparent;width:100%;text-align:left;font:inherit;color:inherit;border-top:0;border-right:0}
+.item:hover{background:var(--sunk)}
+.item[aria-current="true"]{background:var(--accent-soft);border-left-color:var(--accent)}
+.item .no{font-family:var(--f-mono);font-weight:500;grid-row:span 2;align-self:center}
+.item .pl{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .dt,.item .ct{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.item .sum{font-family:var(--f-mono);font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
+.side-foot{padding:10px 12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.empty{padding:22px 16px;color:var(--muted);font-size:13px;display:flex;flex-direction:column;gap:10px}
+input,select{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:7px 9px;min-width:0;width:100%}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+input[aria-invalid="true"]{border-color:var(--warn)}
+.btn{font:inherit;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:6px;padding:7px 12px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.danger{color:var(--warn)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.sm{padding:4px 9px;font-size:13px}
+.main{display:flex;flex-direction:column;gap:14px;min-width:0}
+.ed-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)}
+.ed-head h2{font-family:var(--f-display);font-weight:600;font-size:20px;margin:0}
+.ed-head h2 small{font-family:var(--f-body);font-weight:400;font-size:13px;color:var(--muted);margin-left:8px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.seg button{font:inherit;background:none;border:0;padding:6px 14px;cursor:pointer;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--sunk);color:var(--fg);font-weight:600}
+.fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;padding:16px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.field .hint{font-size:12px;color:var(--warn)}
+details.more{padding:0 16px 12px}
+details.more summary{cursor:pointer;color:var(--muted);font-size:13px}
+details.more .fields{padding:12px 0 0}
+.rows-wrap{overflow-x:auto;border-top:1px solid var(--line)}
+table.rows{border-collapse:collapse;width:100%;min-width:860px;font-variant-numeric:tabular-nums}
+table.rows th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;text-align:left;padding:8px 6px;background:var(--sunk);border-bottom:1px solid var(--line)}
+table.rows td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.rows td.n{font-family:var(--f-mono);color:var(--muted);text-align:center;width:36px}
+table.rows td.sv{font-family:var(--f-mono);text-align:right;width:110px;padding-right:12px}
+table.rows input{padding:5px 7px}
+table.rows input.num{text-align:right}
+table.rows tfoot td{font-weight:600;background:var(--sunk);border-bottom:0;padding:9px 6px}
+.ed-foot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 16px;border-top:1px solid var(--line)}
+.ed-foot .sp{flex:1}
+.msg{font-size:13px;padding:4px 10px;border-radius:6px}
+.msg.ok{background:var(--ok-soft);color:var(--ok)}
+.msg.err{background:var(--warn-soft);color:var(--warn)}
+.confirm{display:inline-flex;gap:6px;align-items:center;font-size:13px}
+.formwrap{overflow-x:auto;background:var(--sunk);padding:24px 16px;border-radius:0 0 10px 10px}
+.view-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.view-tools .sp{flex:1}
+.contents{padding:12px 16px;display:flex;flex-wrap:wrap;gap:6px 20px;font-size:13px;color:var(--muted);border-bottom:1px solid var(--line)}
+.contents b{color:var(--fg);font-family:var(--f-mono);font-weight:500}
+.mono{font-family:var(--f-mono)}
+.pr-lede{margin:0;padding:12px 16px 0;color:var(--muted);font-size:13px;max-width:90ch}
+.pr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;padding:14px 16px 16px}
+.pr-card{border:1px solid var(--line);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--bg);min-width:0}
+.pr-card h3{margin:0;font-size:15px;font-weight:600}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cur{font-size:12px;color:var(--muted)}
+.actions{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap;margin-top:auto}
+.inl{display:inline-flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+.hist{display:flex;flex-wrap:wrap;gap:4px}
+.hc{display:inline-flex;align-items:center;gap:4px;font-family:var(--f-mono);font-size:12px;padding:2px 4px 2px 8px;border-radius:999px;border:1px solid var(--line);background:var(--surface);white-space:nowrap}
+.hc.k{background:var(--accent-soft);border-color:transparent}
+.hc.now{outline:2px solid var(--accent);outline-offset:-1px}
+.hc button{font:inherit;border:0;background:none;color:var(--warn);cursor:pointer;padding:0 4px;border-radius:999px}
+.tag{font-size:10px;text-transform:uppercase;letter-spacing:.06em;background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:4px;margin-left:6px;font-family:var(--f-body)}
+.vlink{font:inherit;background:none;border:0;padding:0;color:var(--fg);cursor:pointer;text-align:left;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.vlink:hover{text-decoration-color:var(--accent)}
+.store{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.store .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);display:inline-block}
+.store.err .dot{background:var(--warn)} .store.err{color:var(--warn)}
+.gate{display:flex;justify-content:center;padding-block:40px}
+.gate-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:24px;max-width:620px;display:flex;flex-direction:column;gap:14px}
+.gate-card h2{font-family:var(--f-display);margin:0;font-size:22px}
+.gate-card p{margin:0}
+.gate-actions{display:flex;gap:10px;flex-wrap:wrap}
+.gate-note{font-size:13px;color:var(--muted)}
+nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px;overflow-x:auto}
+nav.tabs button{font:inherit;font-weight:600;font-size:15px;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:10px 18px;cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.kpr-wrap{display:flex;flex-direction:column;gap:16px}
+.kstats{display:flex;flex-wrap:wrap;gap:8px 28px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.kstat{display:flex;flex-direction:column}
+.kstat b{font-family:var(--f-mono);font-weight:500;font-size:17px;font-variant-numeric:tabular-nums}
+.kstat>span{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.kstat b span{font:inherit}
+.neg{color:var(--warn)}
+.okc{color:var(--ok)}
+table.rows td.num{font-family:var(--f-mono);text-align:right;white-space:nowrap}
+table.rows th.num{text-align:right}
+.btn.yel{background:#ffd23f;border-color:#e0a800;color:#1f1a05;font-weight:700;box-shadow:0 0 0 3px rgba(255,210,63,.35)}
+.btn.yel:hover{background:#ffc400;border-color:#c79300}
+.pv-filters{display:flex;flex-direction:column;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.pv-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.pv-row>b{width:110px;flex:none;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.pc{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:3px 10px;cursor:pointer;white-space:nowrap}
+.pc small{color:var(--muted);margin-left:4px;font-family:var(--f-mono);font-size:11px}
+.pc:hover{border-color:var(--accent)}
+.pc[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.pc[aria-pressed="true"] small{color:inherit;opacity:.8}
+.pc:disabled{opacity:.35;cursor:default}
+.pv-res{max-height:380px;overflow:auto}
+table.pv{min-width:760px}
+table.pv th{cursor:pointer;user-select:none;position:sticky;top:0;z-index:1}
+table.pv th[data-dir="1"]::after{content:" ↑"} table.pv th[data-dir="-1"]::after{content:" ↓"}
+table.pv tbody tr{cursor:pointer}
+table.pv tbody tr.cur td{background:var(--accent-soft)}
+.kpr-kup{padding:10px 16px}
+.kpr-kup .pc{font-size:14px;padding:5px 14px}
+#kpr-table th:nth-child(1),#kpr-table th:nth-child(2){background:var(--c-blue-h)}
+#kpr-table th:nth-child(3),#kpr-table th:nth-child(4),#kpr-table th:nth-child(5){background:var(--c-green-h)}
+#kpr-table th:nth-child(6),#kpr-table th:nth-child(7){background:var(--c-yellow-h)}
+#kpr-table tbody tr:not(.mon) td:nth-child(1),#kpr-table tbody tr:not(.mon) td:nth-child(2){background:var(--c-blue)}
+#kpr-table tbody tr:not(.mon) td:nth-child(3),#kpr-table tbody tr:not(.mon) td:nth-child(4),#kpr-table tbody tr:not(.mon) td:nth-child(5){background:var(--c-green)}
+#kpr-table tbody tr:not(.mon) td:nth-child(6),#kpr-table tbody tr:not(.mon) td:nth-child(7){background:var(--c-yellow)}
+#kpr-table tbody tr:not(.mon):hover td{filter:brightness(.96)}
+#kpr-years th:nth-child(1),#kpr-years tfoot td:nth-child(1){background:var(--c-blue-h)}
+#kpr-years th:nth-child(n+2):nth-child(-n+5),#kpr-years tfoot td:nth-child(n+2):nth-child(-n+5){background:var(--c-green-h)}
+#kpr-years th:nth-child(n+6),#kpr-years tfoot td:nth-child(n+6){background:var(--c-yellow-h)}
+#kpr-years tbody td:nth-child(1){background:var(--c-blue)}
+#kpr-years tbody td:nth-child(n+2):nth-child(-n+5){background:var(--c-green)}
+#kpr-years tbody td:nth-child(n+6){background:var(--c-yellow)}
+#kpr-years tbody tr.sel td{font-weight:700;box-shadow:inset 0 2px 0 var(--accent),inset 0 -2px 0 var(--accent)}
+#kpr-years tbody tr:hover td{filter:brightness(.96)}
+table.rows tr.mon td{background:var(--sunk);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:6px}
+table.rows tr.sel td{background:var(--accent-soft)}
+table.yr{min-width:620px}
+.kpr-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.kpr-actions select{width:auto}
+.kpr-form{display:grid;grid-template-columns:160px 160px minmax(0,1fr) auto;gap:10px;align-items:end;padding:14px 16px;border-bottom:1px solid var(--line);background:var(--bg)}
+@media (max-width:700px){.kpr-form{grid-template-columns:1fr 1fr}}
+table.rows input.nap{border:1px solid transparent;background:transparent;padding:4px 6px;min-width:240px;color:var(--fg)}
+table.rows input.nap:hover{border-color:var(--line)}
+table.rows input.nap:focus{background:var(--surface);border-color:var(--accent)}
+table.rows input.nap::placeholder{color:transparent}
+table.rows tr:hover input.nap::placeholder,table.rows input.nap:focus::placeholder{color:var(--muted);opacity:.7}
+table.by{min-width:980px;font-size:13px}
+table.by td,table.by th{padding:6px 4px}
+table.by th:first-child,table.by td:first-child{position:sticky;left:0;z-index:1;background:var(--surface);padding-left:10px}
+table.by thead th:first-child,table.by tfoot td:first-child{background:var(--sunk)}
+table.by tr.sel td:first-child{background:var(--accent-soft)}
+table.by .cl{font-size:13px}
+table.by .cl.on small{color:inherit;opacity:.85}
+table.by .cl{font:inherit;font-family:var(--f-mono);background:none;border:0;padding:2px 4px;border-radius:4px;color:var(--fg);cursor:pointer;width:100%;text-align:right;font-variant-numeric:tabular-nums}
+table.by .cl:hover{background:var(--accent-soft)}
+table.by .cl.on{background:var(--accent);color:var(--accent-ink)}
+table.by .cl.yr{text-align:left;font-weight:600}
+table.by .mut{color:var(--muted);text-align:center}
+table.by tr.sel td{background:var(--accent-soft)}
+table.by td small{display:block;color:var(--muted);font-size:11px;font-family:var(--f-body)}
+table.ku{min-width:1250px}
+table.ku input{padding:5px 7px;border:1px solid transparent;background:transparent}
+table.ku input:hover{border-color:var(--line)}
+table.ku input:focus{background:var(--surface);border-color:var(--accent)}
+table.ku input[aria-invalid="true"]{border-color:var(--warn)}
+table.ku input::placeholder{color:var(--muted);opacity:.7}
+.pd-head{border-top:1px solid var(--line);background:var(--bg);gap:12px}
+.pd-head b{font-size:15px}
+table.pd{min-width:560px}
+table.pd th{cursor:pointer;user-select:none}
+table.pd th[data-dir="1"]::after{content:" ↑"} table.pd th[data-dir="-1"]::after{content:" ↓"}
+table.pd tr.on td{background:var(--accent-soft)}
+.bar{height:8px;border-radius:4px;background:var(--accent);opacity:.75;min-width:2px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:3px 4px 3px 10px;border-radius:999px;background:var(--accent-soft)}
+.chip button{font:inherit;border:0;background:none;cursor:pointer;color:var(--warn);padding:0 6px}
+.item .ku{grid-column:2/4;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#a8650b">
+<link rel="icon" href="ikona-192.png">
+<link rel="apple-touch-icon" href="ikona-192.png">
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Otkupni blokovi Mrkvica</h1>
+      <p class="sub">OPG Balažić → Mrkvica d.o.o. · unos blokova i izrada obrasca prema sheetu Mr.Otk.Bl.26 (B13:I42) · <span id="ver"></span></p>
+    </div>
+    <div class="store" id="store-status" hidden><span class="dot"></span><span id="st-txt"></span><button class="btn sm" id="st-change">Promijeni mapu</button></div>
+  </header>
+  <div class="msg err" id="osnova-bar" hidden style="margin:0 0 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span>Cjenik i podaci kupca/prodavatelja nisu učitani. Učitajte datoteku <b>mrkvica-osnova.json</b> (samo jednom, zatim se čuva u vašim podacima).</span><button class="btn sm" id="osnova-btn">Učitaj osnovne podatke</button></div>
+  <div class="gate" id="gate">
+    <div class="gate-card">
+      <h2>Podaci otkupnih blokova</h2>
+      <p id="gate-text">Učitavanje…</p>
+      <div class="gate-actions"><button class="btn primary" id="g-open" hidden>Otvori podatke</button><button class="btn" id="g-pick">Odaberi mapu za podatke</button></div>
+      <p class="gate-note">Svi otkupni blokovi, cjenik i korekcije cijena spremaju se u jednu datoteku, <b>mrkvica-otkupni-blokovi.json</b>, u odabranoj mapi. Prvom spremanju svakog dana prethodi sigurnosna kopija u podmapi <b>Sigurnosne kopije</b> (čuva se zadnjih 60).</p>
+      <p id="g-err" hidden><span class="msg err" id="g-err-t"></span></p>
+    </div>
+  </div>
+
+  <nav class="tabs" id="tabs" role="tablist" hidden>
+    <button role="tab" id="t-blokovi" aria-selected="true">Otkupni blokovi</button>
+    <button role="tab" id="t-kpr" aria-selected="false">KPR</button>
+    <button role="tab" id="t-cijene" aria-selected="false">Cijene</button>
+    <button role="tab" id="t-kupci" aria-selected="false">Kupci</button>
+  </nav>
+
+  <div class="layout" id="app" hidden>
+    <section class="panel" id="by-panel" style="grid-column:1/-1">
+      <div class="ed-head">
+        <h2>Pregled<small>klikom odaberite godinu, mjesec, kupca i mjesto otkupa · klik na zaglavlje stupca sortira</small></h2>
+        <div style="display:flex;gap:8px"><button class="btn sm" id="pv-reset">Poništi odabir</button><button class="btn sm" id="by-toggle" aria-expanded="true">Sakrij pregled</button></div>
+      </div>
+      <div id="by-wrap">
+        <div class="pv-filters" id="pv-filters"></div>
+        <div class="kstats" id="pv-sum"></div>
+        <div class="rows-wrap pv-res" style="border-top:0"><table class="rows pv" id="pv-table"></table></div>
+      </div>
+    </section>
+    <aside class="panel side" id="blk-side" aria-label="Popis otkupnih blokova">
+      <div class="side-head">
+        <div class="row">
+          <button class="btn primary" id="new" style="flex:1">+ Novi otkupni blok</button>
+        </div>
+        <input type="search" id="q" placeholder="Traži broj, mjesto, proizvod…" aria-label="Traži blokove">
+        <div class="row">
+          <select id="fy" aria-label="Godina"><option value="">Sve godine</option></select>
+          <select id="fm" aria-label="Mjesec"><option value="">Svi mjeseci</option></select>
+        </div>
+        <label class="inl" for="fs" style="justify-content:space-between">Sortiraj
+          <select id="fs" style="width:auto;flex:1">
+            <option value="broj">po broju bloka (najnoviji prvi)</option>
+            <option value="datum">po datumu</option>
+            <option value="mjesto">po mjestu otkupa</option>
+            <option value="kupac">po kupcu</option>
+            <option value="iznos">po iznosu (najveći prvi)</option>
+          </select>
+        </label>
+
+      </div>
+      <div class="list" id="list"><div class="empty">Učitavanje blokova…</div></div>
+      <div class="side-foot"><span id="tot"></span><span style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn sm" id="imp-file">Uvezi datoteku</button><button class="btn sm" id="imp">Uvezi iz Excela</button></span><input type="file" id="imp-input" accept=".json,application/json" hidden></div>
+    </aside>
+
+    <section class="main" id="blk-main">
+      <div class="panel" id="editor">
+        <div class="ed-head">
+          <h2 id="ed-title">Novi otkupni blok</h2>
+          <span class="sp" style="flex:1"></span>
+          <span id="del-top"></span>
+          <div class="seg" role="group" aria-label="Prikaz">
+            <button id="m-edit" aria-pressed="true">Unos</button>
+            <button id="m-view" aria-pressed="false">Otkupni blok</button>
+          </div>
+        </div>
+
+        <div id="v-edit">
+          <div class="fields">
+            <div class="field"><label for="f-broj">Otkupni blok broj</label><input id="f-broj" inputmode="numeric" autocomplete="off"><span class="hint" id="h-broj"></span></div>
+            <div class="field"><label for="f-datum">Datum</label><input id="f-datum" type="date"></div>
+            <div class="field"><label for="f-mjesto">Mjesto otkupa *</label><input id="f-mjesto" list="dl-mjesta" autocomplete="off" aria-required="true"><span class="hint" id="h-mjesto"></span></div>
+            <div class="field"><label for="f-kupac">Kupac</label><input id="f-kupac" list="dl-kupci" autocomplete="off" placeholder="Odaberite ili upišite kupca"><span class="cur" id="h-kupac"></span></div>
+            <div class="field"><label for="f-oibk">OIB kupca</label><input id="f-oibk" inputmode="numeric" autocomplete="off"><span class="hint" id="h-oibk"></span></div>
+          </div>
+          <details class="more"><summary>Prodavatelj (OPG Balažić)</summary>
+            <div class="fields">
+              <div class="field"><label for="f-prod">Prodavatelj</label><input id="f-prod" autocomplete="off"></div>
+              <div class="field"><label for="f-oibp">OIB prodavatelja</label><input id="f-oibp" inputmode="numeric" autocomplete="off"></div>
+            </div>
+          </details>
+          <div class="rows-wrap">
+            <table class="rows">
+              <thead><tr><th>Rb.</th><th style="min-width:200px">Vrsta poljoprivrednog proizvoda</th><th>LOT</th><th style="width:70px">JM</th><th style="width:90px">Količina</th><th style="width:70px">Kvaliteta</th><th style="width:110px">Jed. cijena €</th><th style="text-align:right;padding-right:12px">Svota u €</th><th style="width:40px"></th></tr></thead>
+              <tbody id="rows"></tbody>
+              <tfoot><tr><td colspan="7" style="text-align:right">UKUPNO</td><td class="sv" id="sum"></td><td></td></tr></tfoot>
+            </table>
+          </div>
+          <div class="ed-foot">
+            <button class="btn" id="add">+ Dodaj redak</button>
+            <span class="mono" style="font-size:12px;color:var(--muted)" id="rowcount"></span>
+            <span class="sp"></span>
+            <span id="msg"></span>
+            <span id="del-area"></span>
+            <button class="btn" id="discard">Odbaci izmjene</button>
+            <button class="btn primary" id="save">Spremi blok</button>
+          </div>
+        </div>
+
+        <div id="v-view" hidden>
+          <div class="view-tools">
+            <span id="view-info" style="font-size:13px;color:var(--muted)"></span>
+            <span class="sp"></span>
+            <button class="btn" id="dl-xlsx">Spremi Excel (.xlsx)</button><button class="btn" id="dl-pdf">Spremi PDF</button><button class="btn primary" id="print">Ispiši obrazac</button>
+          </div>
+          <div class="contents" id="contents"></div>
+          <div class="formwrap"><div id="form-out"></div></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section class="kpr-wrap" id="cijene-sec" hidden>
+      <div class="panel" id="pricing">
+      <div class="ed-head">
+        <h2>Cijene<small>sve cijene s datumom od kojeg vrijede</small></h2>
+        <button class="btn primary" id="pr-toggle" aria-expanded="false" aria-controls="pr-forms">Korekcija cijene</button>
+      </div>
+      <p class="pr-lede">Cijene iz Excela vrijede od 11.11.2025. (žute stavke) ili 24.11.2025. (bijele). Korekcija vrijedi od upisanog datuma nadalje. Novi otkupni blok uzima cijenu koja vrijedi na datum bloka, a već spremljeni blokovi zadržavaju svoje cijene.</p>
+      <div class="pr-grid" id="pr-forms" hidden>
+        <form class="pr-card" id="kor-form" novalidate>
+          <h3>Korigiraj cijenu</h3>
+          <div class="field"><label for="k-vrsta">Vrsta meda</label><input id="k-vrsta" list="dl-vrste" autocomplete="off" placeholder="npr. bagrem v"><span class="cur" id="k-cur">Odaberite vrstu iz cjenika.</span></div>
+          <div class="two">
+            <div class="field"><label for="k-cijena">Nova cijena €</label><input id="k-cijena" inputmode="decimal" autocomplete="off"></div>
+            <div class="field"><label for="k-od">Vrijedi od</label><input id="k-od" type="date"></div>
+          </div>
+          <div class="actions"><span id="k-msg"></span><button class="btn primary" type="submit">Spremi korekciju</button></div>
+        </form>
+        <form class="pr-card" id="novi-form" novalidate>
+          <h3>Novi tip meda</h3>
+          <div class="two">
+            <div class="field"><label for="n-vrsta">Naziv</label><input id="n-vrsta" autocomplete="off" placeholder="npr. kadulja v"></div>
+            <div class="field"><label for="n-lot">LOT</label><input id="n-lot" autocomplete="off" class="mono"></div>
+          </div>
+          <div class="two">
+            <div class="field"><label for="n-jm">Jedinica mjere</label><input id="n-jm" value="kom" autocomplete="off"></div>
+            <div class="field"><label for="n-kv">Kvaliteta</label><input id="n-kv" value="I" autocomplete="off"></div>
+          </div>
+          <div class="two">
+            <div class="field"><label for="n-cijena">Cijena €</label><input id="n-cijena" inputmode="decimal" autocomplete="off"></div>
+            <div class="field"><label for="n-od">Vrijedi od</label><input id="n-od" type="date"></div>
+          </div>
+          <div class="actions"><span id="n-msg"></span><button class="btn primary" type="submit">Dodaj tip meda</button></div>
+        </form>
+      </div>
+      <div class="view-tools">
+        <input type="search" id="c-q" placeholder="Traži vrstu ili LOT…" aria-label="Traži u cjeniku" style="max-width:280px">
+        <label class="inl" for="c-dan">Cijene na dan <input type="date" id="c-dan" style="width:auto"></label>
+        <span class="sp"></span>
+        <span class="mono" style="font-size:12px;color:var(--muted)" id="c-count"></span>
+      </div>
+      <div class="rows-wrap" style="border-top:0"><table class="rows" id="c-table"></table></div>
+    </div>
+  </section>
+
+  <section class="kpr-wrap" id="kupci-sec" hidden>
+    <div class="panel">
+      <div class="ed-head">
+        <h2>Kupci<small>podaci se automatski upisuju u novi otkupni blok kad odaberete kupca</small></h2>
+        <button class="btn primary" id="ku-add">+ Novi kupac</button>
+      </div>
+      <div class="view-tools"><span style="font-size:13px;color:var(--muted)">Kliknite u polje i promijenite podatak; sprema se kad pritisnete Enter ili kliknete izvan polja. „Zadani” kupac se upisuje u svaki novi blok.</span><span class="sp"></span><span id="ku-msg"></span></div>
+      <div class="rows-wrap" style="border-top:0"><table class="rows ku" id="ku-table"></table></div>
+    </div>
+  </section>
+
+  <section class="kpr-wrap" id="kpr" hidden>
+    <div class="panel kpr-kup"><div class="pv-row" id="kpr-kupci"></div></div>
+    <div class="panel">
+      <div class="ed-head"><h2>KPR · pregled po godinama<small>saldo = uplata − potražuje · ukupno = stanje sa svim prethodnim godinama</small></h2></div>
+      <div class="rows-wrap" style="border-top:0"><table class="rows yr" id="kpr-years"></table></div>
+    </div>
+    <div class="panel">
+      <div class="ed-head">
+        <h2 id="kpr-title">KPR</h2>
+        <div class="kpr-actions">
+          <label class="inl" for="kpr-god">Godina <select id="kpr-god"></select></label>
+          <button class="btn" id="kpr-add-u">+ Uplata</button>
+          <button class="btn" id="kpr-add-i">+ Ispravak</button>
+        </div>
+      </div>
+      <div class="kstats" id="kpr-stats"></div>
+      <form class="kpr-form" id="kpr-form" novalidate hidden>
+        <div class="field"><label for="kf-datum">Datum</label><input id="kf-datum" type="date"></div>
+        <div class="field"><label for="kf-iznos" id="kf-iznos-l">Iznos uplate €</label><input id="kf-iznos" inputmode="decimal" autocomplete="off"></div>
+        <div class="field"><label for="kf-nap">Napomena</label><input id="kf-nap" autocomplete="off"></div>
+        <div class="actions"><button class="btn" type="button" id="kf-cancel">Odustani</button><button class="btn primary" type="submit" id="kf-save">Spremi</button></div>
+      </form>
+      <div class="view-tools">
+        <input type="search" id="kpr-q" placeholder="Traži broj bloka, iznos, napomenu…" aria-label="Traži u KPR-u" style="max-width:300px">
+        <select id="kpr-f" aria-label="Prikaz" style="width:auto">
+          <option value="">Svi unosi</option><option value="blok">Samo otkupni blokovi</option><option value="uplata">Samo uplate i ispravci</option><option value="raz">Samo razlike s blokovima</option>
+        </select>
+        <button class="btn" id="kpr-imp2" hidden>Uvezi iz Excela</button>
+        <span class="sp"></span><span id="kpr-msg"></span>
+      </div>
+      <div class="rows-wrap" style="border-top:0"><table class="rows" id="kpr-table"></table></div>
+      <div class="empty" id="kpr-empty" hidden><span>Još nema KPR unosa. Uvezite KPR iz Excela (KPR Detaljno 23, 24, 25 i KPR DT. 26) ili dodajte prvu uplatu. Svaki spremljeni otkupni blok sam se upisuje u KPR.</span><button class="btn" id="kpr-imp">Uvezi KPR iz Excela</button></div>
+    </div>
+  </section>
+
+  <datalist id="dl-mjesta"></datalist>
+  <datalist id="dl-vrste"></datalist>
+  <datalist id="dl-kupci"></datalist>
+</div>
+
+<script id="appdata" type="application/json">{"def":{},"katalog":[],"uvoz":[],"form":{"cells":{"13,2":{"b":[2,0,0,2],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"13,3":{"b":[2,0,0,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"13,4":{"b":[2,0,0,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"13,5":{"b":[2,0,0,0],"bold":true,"sz":11.0,"al":"","bg":"","v":"OTKUPNI BLOK"},"13,6":{"b":[2,0,0,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"13,7":{"b":[2,0,0,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"13,8":{"b":[2,0,0,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"13,9":{"b":[2,2,0,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"14,2":{"b":[2,2,2,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":"Otkupni blok broj:"},"14,3":{"b":[2,2,2,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"14,4":{"b":[2,2,2,0],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"14,5":{"b":[2,2,2,2],"bold":false,"sz":10.0,"al":"center","bg":"FFFFFF00","v":null},"14,6":{"b":[2,2,2,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":"Datum:"},"14,7":{"b":[2,2,2,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"14,8":{"b":[2,2,2,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"14,9":{"b":[2,2,2,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"15,2":{"b":[2,2,2,2],"bold":true,"sz":11.0,"al":"center","bg":"","v":"Za otkup poljoprivrednih proizvoda"},"15,3":{"b":[2,0,2,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"15,4":{"b":[2,0,2,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"15,5":{"b":[2,2,2,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"15,6":{"b":[2,2,2,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":" Mjesto otkupa:"},"15,7":{"b":[2,2,2,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"15,8":{"b":[2,0,2,2],"bold":false,"sz":10.0,"al":"center","bg":"FF7030A0","v":null},"15,9":{"b":[2,0,2,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"16,2":{"b":[2,0,2,2],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"16,3":{"b":[2,0,2,0],"bold":false,"sz":10.0,"al":"center","bg":"","v":"Kupac"},"16,4":{"b":[2,0,2,0],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"16,5":{"b":[2,2,2,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"16,6":{"b":[2,0,2,2],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"16,7":{"b":[2,0,2,0],"bold":false,"sz":10.0,"al":"left","bg":"","v":"Prodavatelj"},"16,8":{"b":[2,0,2,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"16,9":{"b":[2,2,2,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"17,2":{"b":[2,2,0,2],"bold":true,"sz":11.0,"al":"center","bg":"","v":null},"17,3":{"b":[2,0,0,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"17,4":{"b":[2,0,0,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"17,5":{"b":[2,2,0,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"17,6":{"b":[2,2,0,2],"bold":true,"sz":11.0,"al":"center","bg":"","v":null},"17,7":{"b":[2,0,0,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"17,8":{"b":[2,0,0,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"17,9":{"b":[2,2,0,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"18,2":{"b":[0,0,2,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"18,3":{"b":[0,0,2,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"18,4":{"b":[0,0,2,0],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"18,5":{"b":[0,2,2,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"18,6":{"b":[0,0,2,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"18,7":{"b":[0,0,2,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"18,8":{"b":[0,0,2,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"18,9":{"b":[0,2,2,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"19,2":{"b":[2,1,2,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":"Redni broj"},"19,3":{"b":[2,0,2,2],"bold":false,"sz":10.0,"al":"","bg":"","v":"Vrsta poljoprivrednog proizvoda"},"19,4":{"b":[2,0,2,2],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"19,5":{"b":[2,1,2,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":"Jedinica mjere"},"19,6":{"b":[2,1,2,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":"Količina"},"19,7":{"b":[2,1,2,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":"Kvaliteta"},"19,8":{"b":[2,1,2,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":"Jedinična cijena €"},"19,9":{"b":[2,2,2,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":"Svota u €"},"20,2":{"b":[2,2,1,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"20,3":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"20,4":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"20,5":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"20,6":{"b":[1,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"20,7":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"20,8":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"20,9":{"b":[0,2,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"21,2":{"b":[1,2,1,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"21,3":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"21,4":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"21,5":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"21,6":{"b":[1,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"21,7":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"21,8":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"21,9":{"b":[0,2,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"22,2":{"b":[1,2,1,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"22,3":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"22,4":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"22,5":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"22,6":{"b":[1,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"22,7":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"22,8":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"22,9":{"b":[0,2,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"23,2":{"b":[1,2,1,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"23,3":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"23,4":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"23,5":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"23,6":{"b":[1,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"23,7":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"23,8":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"23,9":{"b":[0,2,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"24,2":{"b":[1,2,1,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"24,3":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"24,4":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"24,5":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"24,6":{"b":[1,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"24,7":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"24,8":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"24,9":{"b":[0,2,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"25,2":{"b":[1,2,1,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"25,3":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"25,4":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"25,5":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"25,6":{"b":[1,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"25,7":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"25,8":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"25,9":{"b":[0,2,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"26,2":{"b":[1,2,1,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"26,3":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"26,4":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"26,5":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"26,6":{"b":[1,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"26,7":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"26,8":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"26,9":{"b":[0,2,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"27,2":{"b":[1,2,1,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"27,3":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"27,4":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"27,5":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"27,6":{"b":[1,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"27,7":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"27,8":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"27,9":{"b":[0,2,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"28,2":{"b":[1,2,1,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"28,3":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"28,4":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"28,5":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"28,6":{"b":[1,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"28,7":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"28,8":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"28,9":{"b":[0,2,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"29,2":{"b":[1,2,1,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"29,3":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"29,4":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"29,5":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"29,6":{"b":[1,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"29,7":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"29,8":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"29,9":{"b":[0,2,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"30,2":{"b":[1,2,1,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"30,3":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"30,4":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"30,5":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"30,6":{"b":[1,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"30,7":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"30,8":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"30,9":{"b":[0,2,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"31,2":{"b":[1,2,1,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"31,3":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"31,4":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"31,5":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"31,6":{"b":[1,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"31,7":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"31,8":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"31,9":{"b":[0,2,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"32,2":{"b":[1,2,1,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"32,3":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"32,4":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"32,5":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"32,6":{"b":[1,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"32,7":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"32,8":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"32,9":{"b":[0,2,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"33,2":{"b":[1,2,1,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"33,3":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"33,4":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"33,5":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"33,6":{"b":[1,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"33,7":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"33,8":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"33,9":{"b":[0,2,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"34,2":{"b":[1,2,1,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"34,3":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"34,4":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"34,5":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"34,6":{"b":[1,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"34,7":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"34,8":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"34,9":{"b":[0,2,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"35,2":{"b":[1,2,1,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"35,3":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"35,4":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"35,5":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"35,6":{"b":[1,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"35,7":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"35,8":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"35,9":{"b":[0,2,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"36,2":{"b":[1,2,1,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"36,3":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"36,4":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"36,5":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"36,6":{"b":[1,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"36,7":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"36,8":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"36,9":{"b":[0,2,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"37,2":{"b":[1,2,1,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"37,3":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"37,4":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"37,5":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"37,6":{"b":[1,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"37,7":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"37,8":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"37,9":{"b":[0,2,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"38,2":{"b":[1,2,1,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"38,3":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"38,4":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"38,5":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"38,6":{"b":[1,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"38,7":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"38,8":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"38,9":{"b":[0,2,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"39,2":{"b":[1,2,1,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"39,3":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"39,4":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"39,5":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"39,6":{"b":[1,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"39,7":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"39,8":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"39,9":{"b":[0,2,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"40,2":{"b":[1,2,1,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"40,3":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"40,4":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"40,5":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"40,6":{"b":[1,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"40,7":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"40,8":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"40,9":{"b":[0,2,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"41,2":{"b":[1,2,0,2],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"41,3":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"41,4":{"b":[0,1,1,0],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"41,5":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"41,6":{"b":[1,1,0,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"41,7":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"41,8":{"b":[0,1,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"41,9":{"b":[0,2,1,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"42,2":{"b":[2,1,2,2],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"42,3":{"b":[2,1,2,1],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"42,4":{"b":[2,1,2,1],"bold":false,"sz":10.0,"al":"","bg":"","v":null},"42,5":{"b":[2,1,2,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"42,6":{"b":[2,1,2,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"42,7":{"b":[2,0,2,1],"bold":false,"sz":10.0,"al":"center","bg":"","v":null},"42,8":{"b":[2,2,2,2],"bold":true,"sz":11.0,"al":"center","bg":"","v":"UKUPNO"},"42,9":{"b":[2,2,2,0],"bold":true,"sz":11.0,"al":"center","bg":"","v":null}},"merges":[[18,6,18,8],[14,2,14,3],[14,8,14,9],[17,2,17,5],[15,8,15,9],[18,2,18,3],[17,6,17,9],[15,2,15,5],[14,6,14,7],[15,6,15,7]],"widths":[9.109375,19.109375,16.5546875,14.109375,7.44140625,5.6640625,13.0,13.0],"heights":[15.0,13.8,15.0,13.8,15.0,13.8,28.2,14.4,14.4,14.4,14.4,14.4,14.4,14.4,14.4,14.4,14.4,14.4,14.4,14.4,14.4,14.4,14.4,14.4,14.4,14.4,14.4,14.4,13.8,15.0]},"kpr":{"povijest":[],"unosi":[],"izvori":{}},"kupci":{},"zgBlok":null}</script>
+<script>
+const A=JSON.parse(document.getElementById('appdata').textContent);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const nf=new Intl.NumberFormat('hr-HR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const nfi=new Intl.NumberFormat('hr-HR',{maximumFractionDigits:3});
+const MAXR=22;
+const MJESECI=['siječanj','veljača','ožujak','travanj','svibanj','lipanj','srpanj','kolovoz','rujan','listopad','studeni','prosinac'];
+const DEF={kupac:'',oibKupca:'',prodavatelj:'',oibProdavatelja:''};
+if(A.def)Object.assign(DEF,A.def);
+const BASE=new Map();
+function setBase(kat){BASE.clear();for(const k of (kat||[]))if(k&&k[0])BASE.set(String(k[0]).toLowerCase(),{vrsta:k[0],lot:k[1],jm:k[2],kv:k[3],hist:k[4]!=null?[{od:k[5],cijena:k[4],izvor:'excel'}]:[]})}
+setBase(A.katalog);
+const CORR=new Map();  // ključ -> {vrsta,lot,jm,kv,novi,cijene:[{od,cijena}]}
+let KAT=new Map();
+const keyOf=v=>String(v||'').trim().toLowerCase();
+const docId=v=>encodeURIComponent(keyOf(v)).replace(/[!'()*]/g,c=>'%'+c.charCodeAt(0).toString(16).toUpperCase()).replace(/%/g,'~');
+function priceOn(e,d){if(!e||!e.hist.length)return null;d=d||todayISO();let p=null;for(const h of e.hist){if(h.od<=d)p=h}return p||e.hist[0]}
+function rebuildKat(){
+  KAT=new Map();
+  for(const [k,b] of BASE)KAT.set(k,{...b,hist:b.hist.map(h=>({...h}))});
+  for(const [k,c] of CORR){let e=KAT.get(k);
+    if(!e){e={vrsta:c.vrsta,lot:c.lot||'',jm:c.jm||'kom',kv:c.kv||'I',hist:[],novi:true};KAT.set(k,e)}
+    for(const x of (c.cijene||[])){e.hist=e.hist.filter(h=>h.od!==x.od);e.hist.push({od:x.od,cijena:x.cijena,izvor:'korekcija'})}}
+  for(const e of KAT.values())e.hist.sort((a,b)=>a.od.localeCompare(b.od));
+  const d=todayISO();
+  $('dl-vrste').innerHTML=[...KAT.values()].map(e=>{const p=priceOn(e,d);return `<option value="${esc(e.vrsta)}">${esc(e.lot?e.lot+' · ':'')}${p?nf.format(p.cijena)+' €':''}</option>`}).join('');
+  try{if(curTab==='cijene')renderPricing()}catch(e){}
+  if(typeof updKCur==='function')updKCur();
+}
+function todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+rebuildKat();
+
+const parseNum=v=>{if(typeof v==='number')return v;if(v==null)return null;let s=String(v).trim().replace(/\s/g,'');if(!s)return null;
+  if(s.includes(',')){s=s.replace(/\./g,'').replace(',','.')}const n=Number(s);return isFinite(n)?n:NaN};
+const fmtDate=d=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(d||'');return m?`${m[3]}.${m[2]}.${m[1]}.`:''};
+const svota=s=>{const k=parseNum(s.kol),c=parseNum(s.cijena);return (typeof k==='number'&&!isNaN(k)&&typeof c==='number'&&!isNaN(c))?Math.round(k*c*100)/100:null};
+const total=b=>(b.stavke||[]).reduce((a,s)=>a+(svota(s)||0),0);
+const filled=b=>(b.stavke||[]).filter(s=>(s.vrsta||'').trim());
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+
+/* ---------- state ---------- */
+let db=null, col=null;
+const blocks=new Map();   // broj -> saved block
+let selected=null;        // broj of saved block being edited, or null for a new one
+let draft=null;           // working copy
+let mode='edit';
+
+function emptyBlock(){
+  let nums=[...blocks.keys()].filter(k=>/^\d+$/.test(k)).map(Number);
+  if(!nums.length)nums=A.uvoz.map(b=>b.broj).filter(k=>/^\d+$/.test(k)).map(Number);
+  const next=nums.length?String(Math.max(...nums)+1):String(new Date().getFullYear())+'001';
+  const dk=defKupac();
+  return {broj:next,datum:today(),mjesto:'',kupac:dk?dk.naziv:DEF.kupac,oibKupca:dk?dk.oib:DEF.oibKupca,prodavatelj:DEF.prodavatelj,oibProdavatelja:DEF.oibProdavatelja,stavke:[{vrsta:'',lot:'',jm:'',kol:'',kv:'',cijena:''}]};
+}
+const clone=o=>JSON.parse(JSON.stringify(o));
+const norm=b=>({broj:String(b.broj||'').trim(),datum:b.datum||'',mjesto:(b.mjesto||'').trim(),kupac:(b.kupac||'').trim(),oibKupca:(b.oibKupca||'').trim(),
+  prodavatelj:(b.prodavatelj||'').trim(),oibProdavatelja:(b.oibProdavatelja||'').trim(),
+  stavke:(b.stavke||[]).filter(s=>(s.vrsta||'').trim()||String(s.kol??'').trim()).map(s=>({vrsta:(s.vrsta||'').trim(),lot:(s.lot||'').trim(),jm:(s.jm||'').trim(),
+    kol:parseNum(s.kol),kv:(s.kv||'').trim(),cijena:parseNum(s.cijena)}))});
+const dirty=()=>{if(!draft)return false;const a=JSON.stringify(norm(draft));const b=selected&&blocks.has(selected)?JSON.stringify(norm(blocks.get(selected))):JSON.stringify(norm(emptyBlockStable));return a!==b};
+let emptyBlockStable=null;
+
+/* ---------- list ---------- */
+let fKup='',fMj='',pvY='',pvM='',pvSort={k:'broj',d:-1};
+function renderList(){
+  const q=$('q').value.trim().toLowerCase();
+  const arr=[...blocks.values()].sort((a,b)=>String(b.broj).localeCompare(String(a.broj),'hr',{numeric:true}));
+  const fy=$('fy').value,fm=$('fm').value;
+  const ys=[...new Set(arr.map(b=>String(b.datum||'').slice(0,4)).filter(y=>/^\d{4}$/.test(y)))].sort().reverse();
+  $('fy').innerHTML='<option value="">Sve godine</option>'+ys.map(y=>`<option value="${y}"${y===fy?' selected':''}>${y}.</option>`).join('');
+  if(!$('fm').options.length||$('fm').options.length<13)$('fm').innerHTML='<option value="">Svi mjeseci</option>'+MJESECI.map((m,i)=>`<option value="${String(i+1).padStart(2,'0')}">${m}</option>`).join('');
+  $('fm').value=fm;
+  const pass=(b,skip)=>{const d=String(b.datum||'');
+    if(skip!=='y'&&pvY&&d.slice(0,4)!==pvY)return false;if(skip!=='m'&&pvM&&d.slice(5,7)!==pvM)return false;
+    if(skip!=='k'&&fKup&&grpKey(b,'kupac')!==fKup)return false;if(skip!=='p'&&fMj&&grpKey(b,'mjesto')!==fMj)return false;return true};
+  const sel=arr.filter(b=>pass(b));
+  renderPregled(arr,sel,pass,pvY,pvM);
+  const f=arr.filter(b=>{const d=String(b.datum||'');if(fy&&d.slice(0,4)!==fy)return false;if(fm&&d.slice(5,7)!==fm)return false;return true}).filter(b=>!q||[b.broj,b.mjesto,b.kupac,fmtDate(b.datum),...(b.stavke||[]).map(s=>s.vrsta+' '+s.lot)].join(' ').toLowerCase().includes(q));
+  const fs=$('fs').value;
+  const cmp={datum:(a,b)=>String(b.datum).localeCompare(String(a.datum))||String(b.broj).localeCompare(String(a.broj),'hr',{numeric:true}),
+    mjesto:(a,b)=>grpKey(a,'mjesto').localeCompare(grpKey(b,'mjesto'),'hr')||String(b.datum).localeCompare(String(a.datum)),
+    kupac:(a,b)=>grpKey(a,'kupac').localeCompare(grpKey(b,'kupac'),'hr')||String(b.datum).localeCompare(String(a.datum)),
+    iznos:(a,b)=>total(b)-total(a)}[fs];
+  const fShown=cmp?f.slice().sort(cmp):f;
+  const L=$('list');
+  if(!arr.length){L.innerHTML=A.uvoz.length?`<div class="empty"><span>Još nema unesenih otkupnih blokova. Kliknite „Novi otkupni blok“ za prvi unos ili uvezite postojeće blokove iz Excela.</span><button class="btn" id="imp2">Uvezi ${A.uvoz.length} blokova iz Excela</button></div>`:`<div class="empty"><span>Još nema unesenih otkupnih blokova.</span></div>`;const i2=$('imp2');if(i2)i2.onclick=doImport}
+  else if(!fShown.length)L.innerHTML='<div class="empty">Nijedan blok ne odgovara odabiru.</div>';
+  else L.innerHTML=fShown.map(b=>`<button class="item" data-b="${esc(b.broj)}" aria-current="${b.broj===selected}"><span class="no">${esc(b.broj)}</span><span class="pl">${esc(b.mjesto||'—')}</span><span class="sum">${nf.format(total(b))}</span><span class="dt">${fmtDate(b.datum)||'bez datuma'}</span><span class="ct">${filled(b).length} stavki</span>${(b.kupac||'')&&grpKey(b,'kupac')!==(defKupac()||{}).naziv?`<span></span><span class="ku">${esc(b.kupac)}</span>`:''}</button>`).join('');
+  L.querySelectorAll('.item').forEach(el=>el.onclick=()=>select(el.dataset.b));
+  const filt=q||fy||fm;
+  $('tot').textContent=filt?`Prikazano ${fShown.length} od ${arr.length} · ${nf.format(fShown.reduce((a,b)=>a+total(b),0))} €`:`${arr.length} blokova · ${nf.format(arr.reduce((a,b)=>a+total(b),0))} €`;
+  const pl=new Set([...arr.map(b=>b.mjesto),...A.uvoz.map(b=>b.mjesto)].filter(Boolean));
+  $('dl-mjesta').innerHTML=[...pl].sort((a,b)=>a.localeCompare(b,'hr')).map(m=>`<option value="${esc(m)}">`).join('');
+}
+function renderPregled(arr,sel,pass,fy,fm){
+  const R2=x=>Math.round((+x||0)*100)/100;
+  const cnt=(skip,fn)=>{const m=new Map();for(const b of arr){if(!pass(b,skip))continue;const k=fn(b);if(!k)continue;m.set(k,(m.get(k)||0)+1)}return m};
+  const cy=cnt('y',b=>String(b.datum||'').slice(0,4)),cm=cnt('m',b=>String(b.datum||'').slice(5,7)),ck=cnt('k',b=>grpKey(b,'kupac')),cp=cnt('p',b=>grpKey(b,'mjesto'));
+  const allY=[...new Set(arr.map(b=>String(b.datum||'').slice(0,4)).filter(y=>/^\d{4}$/.test(y)))].sort().reverse();
+  const allK=[...new Set(arr.map(b=>grpKey(b,'kupac')))].sort((a,b)=>a.localeCompare(b,'hr'));
+  const allP=[...new Set(arr.map(b=>grpKey(b,'mjesto')))].sort((a,b)=>a.localeCompare(b,'hr'));
+  const chip=(g,v,label,cur,c)=>`<button class="pc" data-g="${g}" data-v="${esc(v)}" aria-pressed="${cur===v}" ${v&&!c&&cur!==v?'disabled':''}>${esc(label)}${v?`<small>${c||0}</small>`:''}</button>`;
+  const row=(title,g,cur,items,allLabel)=>`<div class="pv-row"><b>${title}</b>${chip(g,'',allLabel,cur,1)}${items.join('')}</div>`;
+  $('pv-filters').innerHTML=
+    row('Godina','y',fy,allY.map(y=>chip('y',y,y+'.',fy,cy.get(y))),'Sve')+
+    row('Mjesec','m',fm,MJ3.map((m,i)=>{const v=String(i+1).padStart(2,'0');return chip('m',v,m,fm,cm.get(v))}),'Svi')+
+    row('Kupac','k',fKup,allK.map(k=>chip('k',k,k,fKup,ck.get(k))),'Svi')+
+    row('Mjesto otkupa','p',fMj,allP.map(p=>chip('p',p,p,fMj,cp.get(p))),'Sva');
+  $('pv-filters').querySelectorAll('.pc').forEach(bt=>bt.onclick=()=>{const g=bt.dataset.g,v=bt.dataset.v;
+    if(g==='y')pvY=pvY===v?'':v;else if(g==='m')pvM=pvM===v?'':v;else if(g==='k')fKup=fKup===v?'':v;else fMj=fMj===v?'':v;renderList()});
+  const S=sel.reduce((a,b)=>a+total(b),0),St=sel.reduce((a,b)=>a+filled(b).length,0);
+  const opis=[fm?MJESECI[+fm-1]:'',fy?fy+'.':'',fKup,fMj].filter(Boolean).join(' · ')||'svi blokovi';
+  $('pv-sum').innerHTML=[[esc(opis),'odabrano'],[sel.length,'blokova'],[St,'stavki'],[nf.format(R2(S))+' €','iznos'],[sel.length?nf.format(R2(S/sel.length))+' €':'—','prosjek po bloku']].map(([b,s])=>`<div class="kstat"><b>${b}</b><span>${s}</span></div>`).join('');
+  const key={broj:b=>String(b.broj),datum:b=>String(b.datum||''),kupac:b=>grpKey(b,'kupac'),mjesto:b=>grpKey(b,'mjesto'),st:b=>filled(b).length,iznos:b=>total(b)};
+  const rows=sel.slice().sort((a,b)=>{const ka=key[pvSort.k](a),kb=key[pvSort.k](b);const x=typeof ka==='number'?ka-kb:String(ka).localeCompare(String(kb),'hr',{numeric:true});return x*pvSort.d});
+  const th=(k,l,c='')=>`<th class="${c}" data-sk="${k}" ${pvSort.k===k?`data-dir="${pvSort.d}"`:''}>${l}</th>`;
+  $('pv-table').innerHTML='<thead><tr>'+th('broj','Br. bloka')+th('datum','Datum')+th('kupac','Kupac')+th('mjesto','Mjesto otkupa')+th('st','Stavki','num')+th('iznos','Iznos €','num')+'</tr></thead><tbody>'+
+    (rows.length?rows.map(b=>`<tr data-b="${esc(b.broj)}" class="${b.broj===selected?'cur':''}"><td class="mono">${esc(b.broj)}</td><td class="mono">${fmtDate(b.datum)}</td><td>${esc(grpKey(b,'kupac'))}</td><td>${esc(grpKey(b,'mjesto'))}</td><td class="num">${filled(b).length}</td><td class="num"><b>${nf.format(R2(total(b)))}</b></td></tr>`).join(''):'<tr><td colspan="6" style="color:var(--muted);padding:12px">Nema blokova za odabrano.</td></tr>')+
+    `</tbody><tfoot><tr><td colspan="4">Ukupno</td><td class="num">${St}</td><td class="num">${nf.format(R2(S))}</td></tr></tfoot>`;
+  $('pv-table').querySelectorAll('[data-sk]').forEach(x=>x.onclick=()=>{const k=x.dataset.sk;pvSort=pvSort.k===k?{k,d:-pvSort.d}:{k,d:(k==='iznos'||k==='st'||k==='datum'||k==='broj')?-1:1};renderList()});
+  $('pv-table').querySelectorAll('tbody tr[data-b]').forEach(tr=>tr.onclick=()=>{setByOpen(false);select(tr.dataset.b)});
+}
+
+let fSel=null,grpBy='mjesto',grpSort={k:'s',d:-1};
+const grpKey=(b,t)=>t==='kupac'?(String(b.kupac||'').trim()||'(bez kupca)'):(String(b.mjesto||'').trim()||'(bez mjesta)');
+function renderPeriod(arr,fy,fm){
+  const R2=x=>Math.round((+x||0)*100)/100;
+  $('pd-title').textContent=`${fm?MJESECI[+fm-1]+' ':''}${fy?fy+'.':fm?'(sve godine)':'Sve godine'} · ${arr.length} blokova · ${nf.format(R2(arr.reduce((a,b)=>a+total(b),0)))} €`;
+  $('pg-mjesto').setAttribute('aria-pressed',grpBy==='mjesto');$('pg-kupac').setAttribute('aria-pressed',grpBy==='kupac');
+  const g=new Map();for(const b of arr){const k=grpKey(b,grpBy);const o=g.get(k)||{k,n:0,s:0,st:0};o.n++;o.s+=total(b);o.st+=filled(b).length;g.set(k,o)}
+  const S=arr.reduce((a,b)=>a+total(b),0)||1,max=Math.max(1,...[...g.values()].map(o=>o.s));
+  const rows=[...g.values()].sort((a,b)=>{const k=grpSort.k;const x=k==='k'?a.k.localeCompare(b.k,'hr'):a[k]-b[k];return x*grpSort.d||a.k.localeCompare(b.k,'hr')});
+  const th=(k,l,c='')=>`<th class="${c}" data-sk="${k}" ${grpSort.k===k?`data-dir="${grpSort.d}"`:''}>${l}</th>`;
+  let h='<thead><tr>'+th('k',grpBy==='mjesto'?'Mjesto otkupa':'Kupac')+th('n','Blokova','num')+th('st','Stavki','num')+th('s','Iznos €','num')+'<th class="num">Udio</th><th style="width:28%"></th></tr></thead><tbody>';
+  for(const o of rows){const on=fSel&&fSel.t===grpBy&&fSel.v===o.k;
+    h+=`<tr class="${on?'on':''}"><td><button class="vlink" data-gk="${esc(o.k)}" title="Prikaži samo ove blokove u popisu">${esc(o.k)}</button></td><td class="num">${o.n}</td><td class="num">${o.st}</td><td class="num"><b>${nf.format(R2(o.s))}</b></td><td class="num">${(o.s/S*100).toFixed(1).replace('.',',')} %</td><td><div class="bar" style="width:${Math.max(1,o.s/max*100)}%"></div></td></tr>`}
+  $('pd-table').innerHTML=rows.length?h+'</tbody>':'<tbody><tr><td style="color:var(--muted);padding:12px">Nema blokova u odabranom razdoblju.</td></tr></tbody>';
+  $('pd-chip').innerHTML=fSel?'':'<span style="font-size:12px;color:var(--muted)">klik na naziv filtrira popis · klik na zaglavlje sortira</span>';
+  $('pd-table').querySelectorAll('[data-sk]').forEach(x=>x.onclick=()=>{const k=x.dataset.sk;grpSort=grpSort.k===k?{k,d:-grpSort.d}:{k,d:k==='k'?1:-1};renderList()});
+  $('pd-table').querySelectorAll('[data-gk]').forEach(x=>x.onclick=()=>{const v=x.dataset.gk;fSel=fSel&&fSel.t===grpBy&&fSel.v===v?null:{t:grpBy,v};renderList();if(window.innerWidth<900)$('list').scrollIntoView({behavior:'smooth'})});
+}
+$('pv-reset').onclick=()=>{pvY='';pvM='';fKup='';fMj='';renderList()};
+const MJ3=['sij','velj','ožu','tra','svi','lip','srp','kol','ruj','lis','stu','pro'];
+function renderYears(arr,fy,fm){
+  const R2=x=>Math.round((+x||0)*100)/100;
+  const by=new Map();
+  for(const b of arr){const d=String(b.datum||'');const y=d.slice(0,4);if(!/^\d{4}$/.test(y))continue;const m=+d.slice(5,7)||0;
+    const o=by.get(y)||{n:0,s:0,m:Array.from({length:13},()=>({n:0,s:0}))};const t=total(b);o.n++;o.s+=t;o.m[m].n++;o.m[m].s+=t;by.set(y,o)}
+  const ys=[...by.keys()].sort().reverse();
+  let h='<thead><tr><th>Godina</th><th class="num">Blokova</th><th class="num">Iznos €</th>'+MJ3.map(m=>`<th class="num">${m}</th>`).join('')+'</tr></thead><tbody>';
+  let N=0,Su=0;const MS=Array.from({length:13},()=>({n:0,s:0}));
+  for(const y of ys){const o=by.get(y);N+=o.n;Su+=o.s;
+    h+=`<tr class="${y===fy?'sel':''}"><td><button class="cl yr ${y===fy&&!fm?'on':''}" data-y="${y}" title="Prikaži sve blokove ${y}.">${y}.</button></td><td class="num">${o.n}</td><td class="num"><b>${nf.format(R2(o.s))}</b></td>`;
+    for(let m=1;m<=12;m++){const c=o.m[m];MS[m].n+=c.n;MS[m].s+=c.s;const mm=String(m).padStart(2,'0');
+      h+=c.n?`<td><button class="cl ${y===fy&&mm===fm?'on':''}" data-y="${y}" data-m="${mm}" title="${MJESECI[m-1]} ${y}.: ${c.n} blokova">${nf.format(R2(c.s))}<small>${c.n} bl.</small></button></td>`:'<td class="mut">—</td>'}
+    h+='</tr>'}
+  h+=`</tbody><tfoot><tr><td>Ukupno</td><td class="num">${N}</td><td class="num">${nf.format(R2(Su))}</td>`+MS.slice(1).map(c=>`<td class="num">${c.n?nf.format(R2(c.s)):''}</td>`).join('')+'</tr></tfoot>';
+  $('by-table').innerHTML=ys.length?h:'<tbody><tr><td style="color:var(--muted);padding:14px">Još nema blokova.</td></tr></tbody>';
+  $('by-table').querySelectorAll('[data-y]').forEach(bt=>bt.onclick=()=>{const y=bt.dataset.y,m=bt.dataset.m||'';
+    const same=$('fy').value===y&&$('fm').value===m;$('fy').value=same?'':y;$('fm').value=same?'':m;renderList();
+    if(window.innerWidth<900)$('list').scrollIntoView({behavior:'smooth',block:'start'})});
+}
+function setByOpen(open){
+  $('by-wrap').hidden=!open;$('blk-side').hidden=open;$('blk-main').hidden=open;$('pv-reset').hidden=!open;
+  $('by-toggle').textContent=open?'Zatvori pregled · unos blokova':'Prikaži pregled';$('by-toggle').classList.toggle('primary',!open);$('by-toggle').classList.toggle('yel',open);
+  $('by-toggle').setAttribute('aria-expanded',String(open));
+  $('by-panel').querySelector('h2 small').textContent=open?'klikom odaberite godinu, mjesec, kupca i mjesto otkupa · klik na zaglavlje stupca sortira · klik na redak otvara blok':'godine, mjeseci, kupci i mjesta otkupa sa zbrojevima';
+  try{localStorage.setItem('by-open',open?'1':'0')}catch(e){}
+  if(open)window.scrollTo({top:0})}
+$('by-toggle').onclick=()=>setByOpen($('by-wrap').hidden);
+{let o=false;try{o=localStorage.getItem('by-open')==='1'}catch(e){}setByOpen(o)}
+
+/* ---------- editor ---------- */
+function select(broj){
+  if(!$('by-wrap').hidden)setByOpen(false);
+  if(curTab!=='blokovi')showTab('blokovi');
+  closePricing();
+  if(dirty()&&!askLeave(()=>select(broj)))return;
+  selected=broj;draft=clone(blocks.get(broj));if(!draft.stavke.length)draft.stavke.push({vrsta:'',lot:'',jm:'',kol:'',kv:'',cijena:''});
+  fillEditor();renderList();
+  if(window.innerWidth<900)$('editor').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function newBlock(){
+  if(!$('by-wrap').hidden)setByOpen(false);
+  closePricing();
+  if(dirty()&&!askLeave(newBlock))return;
+  selected=null;draft=emptyBlock();emptyBlockStable=clone(draft);setMode('edit');fillEditor();renderList();$('f-mjesto').focus();
+}
+let pendingLeave=null;
+function askLeave(fn){
+  pendingLeave=fn;
+  showMsg('err','Imate nespremljene izmjene.');
+  $('del-area').innerHTML='<span class="confirm"><button class="btn sm danger" id="lv-yes">Odbaci i nastavi</button><button class="btn sm" id="lv-no">Ostani</button></span>';
+  $('lv-yes').onclick=()=>{const f=pendingLeave;pendingLeave=null;selected&&blocks.has(selected)?draft=clone(blocks.get(selected)):draft=clone(emptyBlockStable||emptyBlock());emptyBlockStable=clone(draft);clearMsg();f()};
+  $('lv-no').onclick=()=>{pendingLeave=null;clearMsg();renderDel()};
+  return false;
+}
+const F={broj:'f-broj',datum:'f-datum',mjesto:'f-mjesto',kupac:'f-kupac',oibKupca:'f-oibk',prodavatelj:'f-prod',oibProdavatelja:'f-oibp'};
+function fillEditor(){
+  $('f-mjesto').removeAttribute('aria-invalid');$('h-mjesto').textContent='';
+  for(const k in F)$(F[k]).value=draft[k]||'';
+  try{updKupacInfo()}catch(e){}
+  lastDatum=draft.datum||'';
+  $('ed-title').innerHTML=selected?`Otkupni blok ${esc(selected)}<small>${fmtDate(blocks.get(selected).datum)}</small>`:'Novi otkupni blok<small>nije spremljen</small>';
+  renderRows();validate();renderDel();clearMsg();
+  if(mode==='view')renderView();
+}
+/* ---------- kupci ---------- */
+function kupciMap(){try{if(store&&store.kupci)return store.kupci}catch(e){}return A.kupci}
+function kupciList(){return Object.entries(kupciMap()).filter(([,k])=>k&&k.naziv).map(([id,k])=>({id,...k})).sort((a,b)=>(b.zadani?1:0)-(a.zadani?1:0)||a.naziv.localeCompare(b.naziv,'hr'))}
+function defKupac(){const l=kupciList();return l.find(k=>k.zadani)||l[0]||null}
+const findKupac=n=>{const s=String(n||'').trim().toLowerCase();return s?kupciList().find(k=>k.naziv.trim().toLowerCase()===s)||null:null};
+function fillKupciDl(){$('dl-kupci').innerHTML=kupciList().map(k=>`<option value="${esc(k.naziv)}">${esc([k.adresa,k.oib?'OIB '+k.oib:''].filter(Boolean).join(' · '))}</option>`).join('')}
+function updKupacInfo(){if(!draft)return;const k=findKupac(draft.kupac);
+  $('h-kupac').textContent=k?'':(String(draft.kupac||'').trim()?'Kupac nije u popisu kupaca. Dodajte ga u kartici „Kupci” da se podaci upisuju automatski.':'');
+  $('h-kupac').style.color=k||!String(draft.kupac||'').trim()?'':'var(--warn)';fillKupciDl()}
+$('f-mjesto').addEventListener('input',()=>{if($('f-mjesto').value.trim()){$('f-mjesto').removeAttribute('aria-invalid');$('h-mjesto').textContent=''}});
+$('f-kupac').addEventListener('input',()=>{draft.kupac=$('f-kupac').value;const k=findKupac(draft.kupac);if(k){draft.oibKupca=k.oib||'';draft.adresaKupca=k.adresa||'';$('f-oibk').value=draft.oibKupca;validate()}updKupacInfo()});
+function renderKupci(){
+  const L=kupciList(),cnt=n=>[...blocks.values()].filter(b=>String(b.kupac||'').trim().toLowerCase()===n.trim().toLowerCase()).length;
+  let h='<thead><tr><th style="min-width:200px">Firma</th><th style="min-width:240px">Adresa</th><th style="min-width:150px">Odgovorna osoba</th><th>Telefon</th><th>OIB</th><th>MBS</th><th style="min-width:220px">IBAN</th><th>Zadani</th><th class="num">Blokova</th><th></th></tr></thead><tbody>';
+  for(const k of L){const n=cnt(k.naziv);
+    h+=`<tr><td><input data-k="${esc(k.id)}" data-f="naziv" value="${esc(k.naziv)}" aria-label="Firma"></td><td><input data-k="${esc(k.id)}" data-f="adresa" value="${esc(k.adresa||'')}" placeholder="nepoznata" aria-label="Adresa"></td>
+      <td><input data-k="${esc(k.id)}" data-f="osoba" value="${esc(k.osoba||'')}" placeholder="nepoznata" aria-label="Odgovorna osoba"></td>
+      <td><input data-k="${esc(k.id)}" data-f="telefon" value="${esc(k.telefon||'')}" style="width:120px" placeholder="nepoznat" aria-label="Telefon"></td>
+      <td><input data-k="${esc(k.id)}" data-f="oib" value="${esc(k.oib||'')}" inputmode="numeric" class="mono" style="width:130px" placeholder="nepoznat" aria-label="OIB"></td>
+      <td><input data-k="${esc(k.id)}" data-f="mbs" value="${esc(k.mbs||'')}" class="mono" style="width:120px" placeholder="nepoznat" aria-label="MBS"></td>
+      <td><input data-k="${esc(k.id)}" data-f="iban" value="${esc(k.iban||'')}" class="mono" placeholder="nepoznat" aria-label="IBAN"></td>
+      <td><input type="radio" name="ku-def" data-def="${esc(k.id)}" ${k.zadani?'checked':''} aria-label="Zadani kupac" style="width:auto"></td>
+      <td class="num">${n}</td><td>${n?'':`<button class="btn sm danger" data-kdel="${esc(k.id)}">${kuArmed===k.id?'Obriši?':'✕'}</button>`}</td></tr>`}
+  $('ku-table').innerHTML=h+'</tbody>';
+  const T=$('ku-table');
+  T.querySelectorAll('input[data-f]').forEach(inp=>{
+    const chk=()=>{if(inp.dataset.f==='oib')inp.setAttribute('aria-invalid',String(!!inp.value.trim()&&!/^\d{11}$/.test(inp.value.trim())))};chk();
+    inp.addEventListener('input',chk);
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();inp.blur()}else if(e.key==='Escape'){inp.value=kupciMap()[inp.dataset.k][inp.dataset.f]||'';inp.blur()}});
+    inp.addEventListener('change',async()=>{const K=kupciMap(),k=K[inp.dataset.k],f=inp.dataset.f,old=k[f]||'',nv=inp.value.trim();if(nv===old)return;
+      if(f==='naziv'){if(!nv){inp.value=old;return kumsg('err','Firma ne može biti prazna.')}if(findKupac(nv)&&findKupac(nv).id!==inp.dataset.k){inp.value=old;return kumsg('err','Kupac s tim nazivom već postoji.')}}
+      k[f]=nv;try{await persist();kumsg('ok',`${k.naziv}: spremljeno.`);fillKupciDl()}catch(e){k[f]=old;inp.value=old;kumsg('err','Spremanje nije uspjelo.')}
+      if(f==='naziv')renderKupci()});
+  });
+  T.querySelectorAll('[data-def]').forEach(r=>r.onchange=async()=>{const K=kupciMap();const prev=Object.keys(K).filter(id=>K[id].zadani);Object.keys(K).forEach(id=>K[id].zadani=id===r.dataset.def);
+    try{await persist();kumsg('ok',`Zadani kupac: ${K[r.dataset.def].naziv}.`)}catch(e){Object.keys(K).forEach(id=>K[id].zadani=prev.includes(id));kumsg('err','Spremanje nije uspjelo.')}renderKupci()});
+  T.querySelectorAll('[data-kdel]').forEach(b=>b.onclick=async()=>{const id=b.dataset.kdel;if(kuArmed!==id){kuArmed=id;renderKupci();return}kuArmed=null;const K=kupciMap(),old=K[id];delete K[id];
+    try{await persist();kumsg('ok',`Kupac ${old.naziv} obrisan.`)}catch(e){K[id]=old;kumsg('err','Brisanje nije uspjelo.')}renderKupci()});
+}
+let kuArmed=null;
+const kumsg=(t,s)=>{$('ku-msg').innerHTML=s?`<span class="msg ${t}">${esc(s)}</span>`:''};
+$('ku-add').onclick=async()=>{const K=kupciMap();let n='Novi kupac',i=2;while(findKupac(n))n='Novi kupac '+(i++);const id='k'+Date.now().toString(36);
+  K[id]={naziv:n,adresa:'',oib:'',mbs:'',iban:''};try{await persist()}catch(e){delete K[id];return kumsg('err','Spremanje nije uspjelo.')}renderKupci();
+  const inp=$('ku-table').querySelector(`input[data-k="${id}"][data-f="naziv"]`);if(inp){inp.focus();inp.select()}kumsg('ok','Upišite podatke novog kupca.')};
+
+let lastDatum='';
+for(const k in F)$(F[k]).addEventListener('input',e=>{draft[k]=e.target.value;validate();if(k==='broj')renderDel()});
+$('f-datum').addEventListener('input',()=>{
+  const oldD=lastDatum,newD=draft.datum;let ch=0;
+  draft.stavke.forEach(s=>{const e=KAT.get(keyOf(s.vrsta));if(!e)return;const po=priceOn(e,oldD),pn=priceOn(e,newD);
+    if(po&&pn&&parseNum(s.cijena)===po.cijena&&pn.cijena!==po.cijena){s.cijena=pn.cijena;ch++}});
+  lastDatum=newD;if(ch){renderRows();showMsg('ok',`Cijena prilagođena datumu u ${ch} ${ch===1?'retku':'redaka'}.`)}
+});
+function renderRows(){
+  const tb=$('rows');
+  tb.innerHTML=draft.stavke.map((s,i)=>`<tr data-i="${i}">
+    <td class="n">${i+1}</td>
+    <td><input data-k="vrsta" list="dl-vrste" value="${esc(s.vrsta)}" aria-label="Vrsta, redak ${i+1}" autocomplete="off"></td>
+    <td><input data-k="lot" value="${esc(s.lot)}" aria-label="LOT, redak ${i+1}" class="mono" autocomplete="off"></td>
+    <td><input data-k="jm" value="${esc(s.jm)}" aria-label="Jedinica mjere, redak ${i+1}"></td>
+    <td><input data-k="kol" class="num" inputmode="decimal" value="${esc(s.kol==null?'':typeof s.kol==='number'?nfi.format(s.kol):s.kol)}" aria-label="Količina, redak ${i+1}"></td>
+    <td><input data-k="kv" value="${esc(s.kv)}" aria-label="Kvaliteta, redak ${i+1}"></td>
+    <td><input data-k="cijena" class="num" inputmode="decimal" value="${esc(s.cijena==null?'':typeof s.cijena==='number'?nfi.format(s.cijena):s.cijena)}" aria-label="Jedinična cijena, redak ${i+1}"></td>
+    <td class="sv" data-sv></td>
+    <td><button class="btn sm" data-del title="Ukloni redak" aria-label="Ukloni redak ${i+1}">✕</button></td></tr>`).join('');
+  tb.querySelectorAll('tr').forEach(tr=>{
+    const i=+tr.dataset.i;
+    tr.querySelectorAll('input').forEach(inp=>{
+      inp.addEventListener('input',()=>{draft.stavke[i][inp.dataset.k]=inp.value;
+        if(inp.dataset.k==='vrsta'){const k=KAT.get(inp.value.trim().toLowerCase());if(k){const p=priceOn(k,draft.datum);Object.assign(draft.stavke[i],{vrsta:k.vrsta,lot:k.lot,jm:k.jm,kv:k.kv,cijena:p?p.cijena:''});
+          ['lot','jm','kv','cijena'].forEach(f=>{const el=tr.querySelector(`[data-k="${f}"]`);const v=draft.stavke[i][f];el.value=f==='cijena'&&typeof v==='number'?nfi.format(v):v});}}
+        updSums();});
+    });
+    tr.querySelector('[data-del]').onclick=()=>{draft.stavke.splice(i,1);if(!draft.stavke.length)draft.stavke.push({vrsta:'',lot:'',jm:'',kol:'',kv:'',cijena:''});renderRows()};
+  });
+  updSums();
+}
+function updSums(){
+  $('rows').querySelectorAll('tr').forEach(tr=>{const s=draft.stavke[+tr.dataset.i];const v=svota(s);tr.querySelector('[data-sv]').textContent=v==null?'':nf.format(v);
+    ['kol','cijena'].forEach(k=>{const el=tr.querySelector(`[data-k="${k}"]`);const n=parseNum(s[k]);el.setAttribute('aria-invalid',String(Number.isNaN(n)))})});
+  $('sum').textContent=nf.format(total(draft));
+  $('rowcount').textContent=`${draft.stavke.length} / ${MAXR} redaka`;
+  $('add').disabled=draft.stavke.length>=MAXR;
+}
+$('add').onclick=()=>{if(draft.stavke.length<MAXR){draft.stavke.push({vrsta:'',lot:'',jm:'',kol:'',kv:'',cijena:''});renderRows();const ins=$('rows').querySelectorAll('tr:last-child input');ins[0]&&ins[0].focus()}};
+
+function validate(){
+  let ok=true;const b=String(draft.broj||'').trim();
+  let h='';
+  if(!b)h='Upišite broj bloka.';else if(!/^[0-9A-Za-z._-]+$/.test(b))h='Broj smije sadržavati samo znamenke i slova.';
+  else if(b!==selected&&blocks.has(b))h=`Blok ${b} već postoji.`;
+  $('h-broj').textContent=h;$('f-broj').setAttribute('aria-invalid',String(!!h));if(h)ok=false;
+  const o=String(draft.oibKupca||'').trim();const ho=o&&!/^\d{11}$/.test(o)?'OIB ima 11 znamenki.':'';
+  $('h-oibk').textContent=ho;$('f-oibk').setAttribute('aria-invalid',String(!!ho));
+  return ok;
+}
+function showMsg(t,s){$('msg').innerHTML=`<span class="msg ${t}">${esc(s)}</span>`}
+function clearMsg(){$('msg').innerHTML=''}
+function renderDel(){
+  for(const [area,id] of [['del-area','del'],['del-top','del2']]){
+    $(area).innerHTML=selected?`<button class="btn danger${area==='del-top'?' sm':''}" id="${id}">Obriši blok</button>`:'';
+    if(selected)$(id).onclick=()=>{const kpr=kprData().unosi['b'+selected];
+      $(area).innerHTML=`<span class="confirm">Obrisati blok ${esc(selected)}${kpr?' (i iz KPR-a)':''}? <button class="btn sm danger" id="${id}-yes">Obriši</button><button class="btn sm" id="${id}-no">Odustani</button></span>`;
+      $(id+'-yes').onclick=doDelete;$(id+'-no').onclick=renderDel}}
+}
+$('discard').onclick=()=>{if(selected&&blocks.has(selected))draft=clone(blocks.get(selected));else{draft=clone(emptyBlockStable||emptyBlock())}fillEditor()};
+
+async function doSave(){
+  if(!String(draft.mjesto||'').trim()){$('f-mjesto').setAttribute('aria-invalid','true');$('h-mjesto').textContent='Upišite mjesto otkupa.';
+    showMsg('err','Blok nije spremljen: nedostaje mjesto otkupa.');setMode('edit');$('f-mjesto').focus();return}
+  if(!validate()){showMsg('err','Ispravite označena polja.');return}
+  const bad=draft.stavke.some(s=>Number.isNaN(parseNum(s.kol))||Number.isNaN(parseNum(s.cijena)));
+  if(bad){showMsg('err','Količina i cijena moraju biti brojevi (npr. 7,49).');return}
+  const data={...(selected&&blocks.has(selected)?blocks.get(selected):{}),...norm(draft)};
+  if(!data.stavke.length){showMsg('err','Unesite barem jednu stavku.');return}
+  data.updatedAt=new Date().toISOString();
+  $('save').disabled=true;
+  try{
+    kprSyncBlock(data,selected);
+    if(col){await col.doc(data.broj).set(data);
+      if(selected&&selected!==data.broj){await col.doc(selected).delete()}}
+    if(selected&&selected!==data.broj)blocks.delete(selected);
+    blocks.set(data.broj,data);selected=data.broj;draft=clone(data);
+    fillEditor();renderList();showMsg('ok',col?`Blok ${data.broj} spremljen.`:`Blok ${data.broj} zadržan samo u ovom prikazu.`);
+  }catch(e){showMsg('err',e&&e.code==='quota_exceeded'?'Baza je puna. Obrišite stare blokove pa spremite ponovno.':'Spremanje nije uspjelo. Provjerite vezu i pokušajte ponovno.')}
+  finally{$('save').disabled=false}
+}
+$('save').onclick=doSave;
+async function doDelete(){
+  const b=selected;
+  try{delete kprData().unosi['b'+b];if(col)await col.doc(b).delete();blocks.delete(b);selected=null;draft=emptyBlock();emptyBlockStable=clone(draft);fillEditor();renderList();showMsg('ok',`Blok ${b} obrisan.`)}
+  catch(e){showMsg('err','Brisanje nije uspjelo. Pokušajte ponovno.')}
+}
+$('new').onclick=newBlock;
+$('q').oninput=renderList;$('fy').onchange=renderList;$('fm').onchange=renderList;$('fs').onchange=renderList;
+
+/* ---------- import ---------- */
+let importing=false;
+async function doImport(){
+  if(importing)return;
+  const todo=A.uvoz.filter(b=>!blocks.has(b.broj));
+  if(!todo.length){showMsg('ok','Svi blokovi iz Excela već su uneseni.');return}
+  importing=true;$('imp').disabled=true;
+  let n=0;
+  try{for(const b of todo){const d={...b,stavke:b.stavke.map(s=>({...s})),updatedAt:new Date().toISOString()};
+      {const k=findKupac(d.kupac);if(k&&k.id!==mrkId())kprSyncBlock(d,null)}if(col)await col.doc(b.broj).set(d);blocks.set(b.broj,d);n++;$('imp').textContent=`Uvoz… ${n}/${todo.length}`}
+    showMsg('ok',`Uvezeno ${n} blokova iz Excela.`)}
+  catch(e){showMsg('err',`Uvoz je stao nakon ${n} blokova. Kliknite ponovno za nastavak.`)}
+  finally{importing=false;$('imp').disabled=false;$('imp').textContent='Uvezi iz Excela';renderList()}
+}
+$('imp').onclick=doImport;$('imp').hidden=!A.uvoz.length;
+
+/* ---------- generated form (B13:I42) ---------- */
+function formHTML(b){
+  const FS=A.form,px=w=>Math.round(w*7+5),hp=h=>Math.round(h*4/3);
+  const covered=new Set(),span={};
+  FS.merges.forEach(([r1,c1,r2,c2])=>{span[r1+','+c1]=[r2-r1+1,c2-c1+1];for(let r=r1;r<=r2;r++)for(let c=c1;c<=c2;c++)if(r!==r1||c!==c1)covered.add(r+','+c)});
+  const it=filled(b).slice(0,MAXR);
+  const val={};
+  val['14,5']=b.broj;val['14,8']=fmtDate(b.datum);val['15,8']=b.mjesto;
+  val['17,2']=b.kupac;val['18,2']=b.oibKupca?'OIB: '+b.oibKupca:'';
+  val['17,6']=b.prodavatelj;val['18,6']=b.oibProdavatelja?'OIB: '+b.oibProdavatelja:'';
+  val['19,4']='LOT';
+  let tot=0;
+  for(let i=0;i<MAXR;i++){const r=20+i,s=it[i];val[r+',2']=i+1;
+    if(s){const k=parseNum(s.kol),c=parseNum(s.cijena),sv=svota(s);
+      val[r+',3']=s.vrsta;val[r+',4']=s.lot;val[r+',5']=s.jm;val[r+',6']=k==null?'':nfi.format(k);val[r+',7']=s.kv;val[r+',8']=c==null?'':nfi.format(c);val[r+',9']=sv==null?'':nf.format(sv);if(sv)tot+=sv}}
+  val['42,9']=nf.format(tot);
+  let h=`<table style="border-collapse:collapse;table-layout:fixed;margin:0 auto;background:#fff;color:#000;font-family:Arial,'Liberation Sans',Helvetica,sans-serif;font-size:13.33px;line-height:1.15"><colgroup>`+FS.widths.map(w=>`<col style="width:${px(w)}px">`).join('')+'</colgroup><tbody>';
+  for(let r=13;r<=42;r++){
+    h+=`<tr style="height:${hp(FS.heights[r-13])}px">`;
+    for(let c=2;c<=9;c++){const k=r+','+c;if(covered.has(k))continue;const x=FS.cells[k];
+      const sp=span[k]?` rowspan="${span[k][0]}" colspan="${span[k][1]}"`:'';
+      const st=['padding:1px 3px','border-style:solid','border-color:#000',`border-width:${x.b.map(v=>v+'px').join(' ')}`,r===19?'white-space:normal;vertical-align:middle':'white-space:nowrap;vertical-align:bottom','overflow:hidden'];
+      const al=x.al||(c>=5&&r>=19?'center':'');if(al)st.push('text-align:'+al);
+      if(k==='19,4')st.push('text-align:center');
+      if(x.bold)st.push('font-weight:700');if(x.sz>10)st.push('font-size:'+(x.sz*4/3).toFixed(2)+'px');
+      if(x.bg&&x.bg!=='FFFFFFFF')st.push('background:#'+x.bg.slice(2));
+      const v=k in val?val[k]:((r>=20&&r<=41)||x.v==null?'':x.v);
+      h+=`<td${sp} style="${st.join(';')}">${esc(v)}</td>`}
+    h+='</tr>'}
+  return h+'</tbody></table>';
+}
+function viewBlock(){return selected&&blocks.has(selected)&&!dirty()?blocks.get(selected):norm(draft)}
+function renderView(){
+  const b=viewBlock();
+  const it=filled(b);
+  $('view-info').textContent=dirty()?'Prikaz uključuje nespremljene izmjene.':(selected?'Spremljeni blok.':'Blok još nije spremljen.');
+  const byLot=new Set(it.map(s=>s.lot).filter(Boolean));
+  $('contents').innerHTML=`<span>Blok <b>${esc(b.broj)}</b></span><span>Datum <b>${fmtDate(b.datum)||'—'}</b></span><span>Mjesto <b>${esc(b.mjesto||'—')}</b></span><span>Stavki <b>${it.length}</b></span><span>Komada <b>${nfi.format(it.reduce((a,s)=>a+(parseNum(s.kol)||0),0))}</b></span><span>LOT-ova <b>${byLot.size}</b></span><span>Ukupno <b>${nf.format(total(b))} €</b></span>`+(it.length>MAXR?`<span style="color:var(--warn)">Obrazac ima ${MAXR} redaka; ${it.length-MAXR} stavki nije prikazano.</span>`:'');
+  $('form-out').innerHTML=formHTML(b);
+}
+function setMode(m){mode=m;$('m-edit').setAttribute('aria-pressed',m==='edit');$('m-view').setAttribute('aria-pressed',m==='view');$('v-edit').hidden=m!=='edit';$('v-view').hidden=m!=='view';if(m==='view')renderView()}
+$('m-edit').onclick=()=>setMode('edit');$('m-view').onclick=()=>setMode('view');
+
+function formDoc(b){return `<!doctype html><html lang="hr"><head><meta charset="utf-8"><title>Otkupni blok ${esc(b.broj)}</title><style>body{margin:24px;background:#fff}@page{size:A4;margin:12mm}@media print{body{margin:0}}</style></head><body>${formHTML(b)}</body></html>`}
+$('print').onclick=()=>{
+  const b=viewBlock();const w=window.open('','_blank','width=900,height=1000');
+  if(!w){$('view-info').textContent='Preglednik je blokirao novi prozor. Dopustite skočne prozore za ovu stranicu.';return}
+  w.document.open();w.document.write(formDoc(b).replace('</body>','<script>window.onload=function(){window.focus();window.print()}<\/script></body>'));w.document.close();
+};
+async function exportBlock(kind){
+  const b=viewBlock();const name=`Otkupni_blok_${b.broj}.${kind}`;
+  let data;try{data=kind==='pdf'?buildPdf(b):buildXlsx(b)}catch(e){$('view-info').textContent='Izrada datoteke nije uspjela.';return}
+  try{const d=await dirH.getDirectoryHandle('Obrasci',{create:true});await writeFile(d,name,data);$('view-info').textContent=`Spremljeno: ${dirH.name}\\Obrasci\\${name}`}
+  catch(e){$('view-info').textContent='Spremanje nije uspjelo. Ako je datoteka otvorena u Excelu ili PDF pregledniku, zatvorite je pa pokušajte ponovno.'}
+}
+$('dl-xlsx').onclick=()=>exportBlock('xlsx');$('dl-pdf').onclick=()=>exportBlock('pdf');
+
+/* ---------- izvoz obrasca: .xlsx i .pdf (bez vanjskih biblioteka) ---------- */
+const XL_ROW_OFF=11; // Excel red 13 -> red 2 u izvezenoj datoteci
+function formCells(b){
+  const FS=A.form,it=filled(b).slice(0,MAXR),v={};
+  for(const k in FS.cells){const r=+k.split(',')[0];const x=FS.cells[k];if(x.v!=null&&!(r>=20&&r<=41))v[k]=typeof x.v==='number'?{n:x.v}:{s:String(x.v)}}
+  const br=String(b.broj||'');v['14,5']=/^\d+$/.test(br)?{n:+br,t:br}:{s:br};
+  const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(b.datum||'');
+  v['14,8']=m?{d:(Date.UTC(+m[1],+m[2]-1,+m[3])-Date.UTC(1899,11,30))/864e5,t:fmtDate(b.datum)}:{s:''};
+  v['15,8']={s:b.mjesto||''};v['17,2']={s:b.kupac||''};v['18,2']={s:b.oibKupca?'OIB: '+b.oibKupca:''};
+  v['17,6']={s:b.prodavatelj||''};v['18,6']={s:b.oibProdavatelja?'OIB: '+b.oibProdavatelja:''};v['19,4']={s:'LOT'};
+  let tot=0;
+  for(let i=0;i<MAXR;i++){const r=20+i,s=it[i];v[r+',2']={n:i+1};
+    if(s){const k=parseNum(s.kol),c=parseNum(s.cijena),sv=svota(s);
+      v[r+',3']={s:s.vrsta||''};v[r+',4']={s:s.lot||''};v[r+',5']={s:s.jm||''};v[r+',7']={s:s.kv||''};
+      if(typeof k==='number'&&!isNaN(k))v[r+',6']={n:k};
+      if(typeof c==='number'&&!isNaN(c))v[r+',8']={n:c};
+      if(sv!=null){v[r+',9']={n:sv,m:1,f:`F${r-XL_ROW_OFF}*H${r-XL_ROW_OFF}`};tot+=sv}}}
+  v['42,9']={n:Math.round(tot*100)/100,m:1,f:`SUM(I${20-XL_ROW_OFF}:I${41-XL_ROW_OFF})`};
+  return v;
+}
+const cellText=c=>!c?'':c.s!=null?c.s:c.t!=null?c.t:c.m?nf.format(c.n):nfi.format(c.n);
+function cellAlign(r,c,x){return x.al||((c>=5&&r>=19)||c===2&&r>=19||r+','+c==='19,4'?'center':'')}
+
+/* --- xlsx --- */
+const xesc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g,'');
+const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(u){let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=CRC[(c^u[i])&0xFF]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
+function zip(files){
+  const enc=new TextEncoder(),parts=[],cen=[];let off=0;
+  const u16=n=>[n&255,(n>>8)&255],u32=n=>[n&255,(n>>8)&255,(n>>16)&255,(n>>>24)&255];
+  for(const [name,data] of files){const nb=enc.encode(name),db=typeof data==='string'?enc.encode(data):data,crc=crc32(db);
+    const head=new Uint8Array([...u32(0x04034b50),...u16(20),...u16(0x0800),...u16(0),...u16(0),...u16(0x21),...u32(crc),...u32(db.length),...u32(db.length),...u16(nb.length),...u16(0)]);
+    parts.push(head,nb,db);
+    cen.push(new Uint8Array([...u32(0x02014b50),...u16(20),...u16(20),...u16(0x0800),...u16(0),...u16(0),...u16(0x21),...u32(crc),...u32(db.length),...u32(db.length),...u16(nb.length),...u16(0),...u16(0),...u16(0),...u16(0),...u32(0),...u32(off)]),nb);
+    off+=head.length+nb.length+db.length}
+  const cs=cen.reduce((a,x)=>a+x.length,0);
+  const end=new Uint8Array([...u32(0x06054b50),...u16(0),...u16(0),...u16(files.length),...u16(files.length),...u32(cs),...u32(off),...u16(0)]);
+  const all=[...parts,...cen,end],out=new Uint8Array(all.reduce((a,x)=>a+x.length,0));let p=0;for(const x of all){out.set(x,p);p+=x.length}return out;
+}
+function buildXlsx(b){
+  const FS=A.form,v=formCells(b),BW=['','thin','medium','thick'];
+  const fonts=['<font><sz val="10"/><name val="Arial"/><family val="2"/></font>'],fills=['<fill><patternFill patternType="none"/></fill>','<fill><patternFill patternType="gray125"/></fill>'],borders=['<border><left/><right/><top/><bottom/><diagonal/></border>'],xfs=['<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'];
+  const idx=(arr,x)=>{let i=arr.indexOf(x);if(i<0){arr.push(x);i=arr.length-1}return i};
+  const styleOf=(r,c)=>{const x=FS.cells[r+','+c];if(!x)return 0;const cv=v[r+','+c];
+    const fo=idx(fonts,`<font>${x.bold?'<b/>':''}<sz val="${x.sz>10?x.sz:10}"/><name val="Arial"/><family val="2"/></font>`);
+    const fi=x.bg&&x.bg!=='FFFFFFFF'?idx(fills,`<fill><patternFill patternType="solid"><fgColor rgb="${x.bg}"/><bgColor indexed="64"/></patternFill></fill>`):0;
+    const side=(t,w)=>w?`<${t} style="${BW[Math.min(w,3)]}"><color indexed="64"/></${t}>`:`<${t}/>`;
+    const bo=idx(borders,`<border>${side('left',x.b[3])}${side('right',x.b[1])}${side('top',x.b[0])}${side('bottom',x.b[2])}<diagonal/></border>`);
+    const nf=cv&&cv.d!=null?164:cv&&cv.m?4:0;const al=cellAlign(r,c,x);
+    const ali=(al||r===19)?`<alignment${al?` horizontal="${al}"`:''}${r===19?' vertical="center" wrapText="1"':''}/>`:'';
+    return idx(xfs,`<xf numFmtId="${nf}" fontId="${fo}" fillId="${fi}" borderId="${bo}" xfId="0" applyNumberFormat="${nf?1:0}" applyFont="1" applyFill="${fi?1:0}" applyBorder="1" applyAlignment="${ali?1:0}">${ali}</xf>`)};
+  const col=n=>String.fromCharCode(64+n);
+  let rows='';
+  for(let r=13;r<=42;r++){const R=r-XL_ROW_OFF;let cs='';
+    for(let c=2;c<=9;c++){const s=styleOf(r,c),cv=v[r+','+c],ref=col(c)+R;
+      if(!cv||(cv.s!=null&&cv.s==='')){cs+=`<c r="${ref}" s="${s}"/>`;continue}
+      if(cv.s!=null)cs+=`<c r="${ref}" s="${s}" t="inlineStr"><is><t xml:space="preserve">${xesc(cv.s)}</t></is></c>`;
+      else if(cv.d!=null)cs+=`<c r="${ref}" s="${s}"><v>${cv.d}</v></c>`;
+      else cs+=`<c r="${ref}" s="${s}">${cv.f?`<f>${cv.f}</f>`:''}<v>${cv.n}</v></c>`}
+    rows+=`<row r="${R}" ht="${FS.heights[r-13]}" customHeight="1">${cs}</row>`}
+  const cols='<cols><col min="1" max="1" width="2.7" customWidth="1"/>'+FS.widths.map((w,i)=>`<col min="${i+2}" max="${i+2}" width="${w}" customWidth="1"/>`).join('')+'</cols>';
+  const merges=FS.merges.map(([r1,c1,r2,c2])=>`<mergeCell ref="${col(c1)}${r1-XL_ROW_OFF}:${col(c2)}${r2-XL_ROW_OFF}"/>`).join('');
+  const sheet=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><dimension ref="B2:I31"/><sheetViews><sheetView workbookViewId="0" showGridLines="0"/></sheetViews><sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${rows}</sheetData><mergeCells count="${FS.merges.length}">${merges}</mergeCells><printOptions horizontalCentered="1"/><pageMargins left="0.5" right="0.5" top="0.6" bottom="0.6" header="0.3" footer="0.3"/><pageSetup paperSize="9" orientation="portrait" fitToWidth="1" fitToHeight="1"/></worksheet>`;
+  const styles=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="1"><numFmt numFmtId="164" formatCode="dd\\.mm\\.yyyy\\."/></numFmts><fonts count="${fonts.length}">${fonts.join('')}</fonts><fills count="${fills.length}">${fills.join('')}</fills><borders count="${borders.length}">${borders.join('')}</borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="${xfs.length}">${xfs.join('')}</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+  const name=xesc(('Blok '+b.broj).slice(0,31).replace(/[\\\/?*\[\]:]/g,'-'));
+  return zip([
+    ['[Content_Types].xml','<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>'],
+    ['_rels/.rels','<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
+    ['xl/workbook.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="${name}" sheetId="1" r:id="rId1"/></sheets><definedNames><definedName name="_xlnm.Print_Area" localSheetId="0">'${name.replace(/'/g,"''")}'!$B$2:$I$31</definedName></definedNames><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`],
+    ['xl/_rels/workbook.xml.rels','<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'],
+    ['xl/styles.xml',styles],
+    ['xl/worksheets/sheet1.xml',sheet]]);
+}
+
+/* --- pdf: obrazac se iscrta na platno i spremi kao A4 PDF --- */
+function drawForm(b,S){
+  const FS=A.form,v=formCells(b),px=w=>Math.round(w*7+5),hp=h=>Math.round(h*4/3);
+  const xs=[0];FS.widths.forEach(w=>xs.push(xs[xs.length-1]+px(w)));
+  const ys=[0];for(let r=13;r<=42;r++)ys.push(ys[ys.length-1]+hp(FS.heights[r-13]));
+  const W=xs[xs.length-1],H=ys[ys.length-1],pad=4;
+  const cv=document.createElement('canvas');cv.width=(W+pad*2)*S;cv.height=(H+pad*2)*S;
+  const g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);g.scale(S,S);g.translate(pad,pad);
+  const span={},covered=new Set();
+  FS.merges.forEach(([r1,c1,r2,c2])=>{span[r1+','+c1]=[r2,c2];for(let r=r1;r<=r2;r++)for(let c=c1;c<=c2;c++)if(r!==r1||c!==c1)covered.add(r+','+c)});
+  const X=c=>xs[c-2],Y=r=>ys[r-13];
+  for(let r=13;r<=42;r++)for(let c=2;c<=9;c++){const k=r+','+c;if(covered.has(k))continue;const x=FS.cells[k];if(!x)continue;
+    const [r2,c2]=span[k]||[r,c],x0=X(c),y0=Y(r),y1=Y(r2+1);let x1=X(c2+1);
+    if(x.bg&&x.bg!=='FFFFFFFF'){g.fillStyle='#'+x.bg.slice(2);g.fillRect(x0,y0,x1-x0,y1-y0)}
+    const t=cellText(v[k]);if(!t)continue;
+    g.save();g.beginPath();g.rect(x0+1,y0,x1-x0-2,y1-y0);g.clip();
+    const fs=(x.sz>10?x.sz:10)*4/3;g.font=`${x.bold?'bold ':''}${fs}px Arial, "Liberation Sans", Helvetica, sans-serif`;g.fillStyle='#000';
+    const al=cellAlign(r,c,x)||(v[k]&&v[k].s==null?'right':'left');g.textAlign=al==='center'?'center':al==='right'?'right':'left';
+    let x1c=x1;
+    if(al==='left'&&r!==19&&!span[k]){let cc=c2+1;while(cc<=9&&g.measureText(t).width>x1c-x0-6){const kk=r+','+cc;if(covered.has(kk)||cellText(v[kk])||span[kk])break;x1c=X(cc+1);cc++}
+      g.restore();g.save();g.beginPath();g.rect(x0+1,y0,x1c-x0-2,y1-y0);g.clip();g.font=`${x.bold?'bold ':''}${fs}px Arial, "Liberation Sans", Helvetica, sans-serif`;g.fillStyle='#000';g.textAlign='left'}
+    const tx=al==='center'?(x0+x1)/2:al==='right'?x1-3:x0+3;
+    let lines=[t];
+    if(r===19){const maxw=Math.max(...t.split(' ').map(w=>g.measureText(w).width));if(maxw>x1-x0-4){g.font=`${x.bold?'bold ':''}${fs*(x1-x0-4)/maxw}px Arial, "Liberation Sans", Helvetica, sans-serif`}
+      lines=[];let cur='';for(const w of t.split(' ')){const tryL=cur?cur+' '+w:w;if(g.measureText(tryL).width>x1-x0-6&&cur){lines.push(cur);cur=w}else cur=tryL}lines.push(cur)}
+    const lh=fs*1.15;
+    if(r===19){g.textBaseline='middle';const top=(y0+y1)/2-(lines.length-1)*lh/2;lines.forEach((l,i)=>g.fillText(l,tx,top+i*lh))}
+    else{g.textBaseline='alphabetic';g.fillText(lines[0],tx,y1-3)}
+    g.restore()}
+  g.strokeStyle='#000';g.lineCap='square';
+  const line=(a,b2,c,d,w)=>{if(!w)return;g.lineWidth=w;g.beginPath();g.moveTo(a,b2);g.lineTo(c,d);g.stroke()};
+  for(let r=13;r<=42;r++)for(let c=2;c<=9;c++){const x=FS.cells[r+','+c];if(!x)continue;const x0=X(c),y0=Y(r),x1=X(c+1),y1=Y(r+1);
+    const inner=(rr,cc)=>{for(const [a,bb,c3,d] of FS.merges)if(rr>=a&&rr<=c3&&cc>=bb&&cc<=d)return [a,bb,c3,d];return null};
+    const m=inner(r,c);
+    if(!(m&&r>m[0]))line(x0,y0,x1,y0,x.b[0]);
+    if(!(m&&c<m[3]))line(x1,y0,x1,y1,x.b[1]);
+    if(!(m&&r<m[2]))line(x0,y1,x1,y1,x.b[2]);
+    if(!(m&&c>m[1]))line(x0,y0,x0,y1,x.b[3])}
+  return {canvas:cv,w:W+pad*2,h:H+pad*2};
+}
+function b64bytes(d){const s=atob(d.split(',')[1]);const u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u}
+function buildPdf(b){
+  const {canvas,w,h}=drawForm(b,4);
+  const jpg=b64bytes(canvas.toDataURL('image/jpeg',0.93));
+  const PW=595.28,PH=841.89,M=36,sc=Math.min((PW-2*M)/w,(PH-2*M)/h),dw=w*sc,dh=h*sc,dx=(PW-dw)/2,dy=PH-M-dh;
+  const enc=new TextEncoder(),chunks=[],offs=[];let len=0;
+  const add=x=>{const u=typeof x==='string'?enc.encode(x):x;chunks.push(u);len+=u.length};
+  const obj=(n,body)=>{offs[n]=len;add(`${n} 0 obj\n`);body();add('\nendobj\n')};
+  add('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n'.replace(/[\xE2\xE3\xCF\xD3]/g,''));
+  obj(1,()=>add('<</Type/Catalog/Pages 2 0 R>>'));
+  obj(2,()=>add('<</Type/Pages/Kids[3 0 R]/Count 1>>'));
+  obj(3,()=>add(`<</Type/Page/Parent 2 0 R/MediaBox[0 0 ${PW} ${PH}]/Resources<</XObject<</Im0 4 0 R>>>>/Contents 5 0 R>>`));
+  obj(4,()=>{add(`<</Type/XObject/Subtype/Image/Width ${canvas.width}/Height ${canvas.height}/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length ${jpg.length}>>\nstream\n`);add(jpg);add('\nendstream')});
+  const cs=`q ${dw.toFixed(2)} 0 0 ${dh.toFixed(2)} ${dx.toFixed(2)} ${dy.toFixed(2)} cm /Im0 Do Q`;
+  obj(5,()=>add(`<</Length ${cs.length}>>\nstream\n${cs}\nendstream`));
+  obj(6,()=>add(`<</Title(Otkupni blok ${String(b.broj).replace(/[()\\]/g,'')})/Producer(Otkupni blokovi Mrkvica)>>`));
+  const xref=len;
+  add(`xref\n0 7\n0000000000 65535 f \n`+[1,2,3,4,5,6].map(n=>String(offs[n]).padStart(10,'0')+' 00000 n \n').join(''));
+  add(`trailer\n<</Size 7/Root 1 0 R/Info 6 0 R>>\nstartxref\n${xref}\n%%EOF\n`);
+  const out=new Uint8Array(len);let p=0;for(const c of chunks){out.set(c,p);p+=c.length}return out;
+}
+
+/* ---------- korekcija cijene ---------- */
+let catCol=null;
+function openPricing(){
+  if(!$('k-od').value)$('k-od').value=todayISO();if(!$('n-od').value)$('n-od').value=todayISO();if(!$('c-dan').value)$('c-dan').value=todayISO();
+  renderPricing()}
+function closePricing(){}
+function setPrForms(open){$('pr-forms').hidden=!open;$('pr-toggle').setAttribute('aria-expanded',String(open));$('pr-toggle').textContent=open?'Zatvori korekciju':'Korekcija cijene';$('pr-toggle').classList.toggle('primary',!open)}
+$('pr-toggle').onclick=()=>{const o=$('pr-forms').hidden;setPrForms(o);if(o)$('k-vrsta').focus()};
+const pmsg=(id,t,s)=>{$(id).innerHTML=s?`<span class="msg ${t}">${esc(s)}</span>`:''};
+function updKCur(){const e=KAT.get(keyOf($('k-vrsta').value));const d=$('k-od').value||todayISO();
+  if(!e){$('k-cur').textContent=$('k-vrsta').value.trim()?'Ta vrsta nije u cjeniku. Dodajte je kao novi tip meda.':'Odaberite vrstu iz cjenika.';return}
+  const p=priceOn(e,todayISO()),pd=priceOn(e,d);
+  $('k-cur').textContent=`Danas: ${p?nf.format(p.cijena)+' € (od '+fmtDate(p.od)+')':'bez cijene'}${d!==todayISO()&&pd?` · na ${fmtDate(d)}: ${nf.format(pd.cijena)} €`:''}`}
+$('k-vrsta').addEventListener('input',()=>{updKCur();pmsg('k-msg')});$('k-od').addEventListener('input',updKCur);
+
+async function writeCorr(key,doc){
+  if(catCol){if(doc)await catCol.doc(docId(key)).set(doc);else await catCol.doc(docId(key)).delete()}
+  if(doc)CORR.set(key,doc);else CORR.delete(key);rebuildKat();
+}
+$('kor-form').addEventListener('submit',async ev=>{ev.preventDefault();
+  const e=KAT.get(keyOf($('k-vrsta').value)),c=parseNum($('k-cijena').value),od=$('k-od').value;
+  if(!e)return pmsg('k-msg','err','Odaberite postojeću vrstu.');
+  if(c==null||Number.isNaN(c)||c<0)return pmsg('k-msg','err','Upišite cijenu, npr. 8,90.');
+  if(!od)return pmsg('k-msg','err','Upišite datum od kojeg cijena vrijedi.');
+  const key=keyOf(e.vrsta),old=CORR.get(key)||{vrsta:e.vrsta,lot:e.lot,jm:e.jm,kv:e.kv,novi:!!e.novi,cijene:[]};
+  const doc={...old,cijene:[...(old.cijene||[]).filter(x=>x.od!==od),{od,cijena:c}].sort((a,b)=>a.od.localeCompare(b.od)),updatedAt:new Date().toISOString()};
+  try{await writeCorr(key,doc);pmsg('k-msg','ok',`${e.vrsta}: ${nf.format(c)} € od ${fmtDate(od)}`);$('k-cijena').value='';updKCur()}
+  catch(err){pmsg('k-msg','err','Spremanje nije uspjelo. Pokušajte ponovno.')}
+});
+$('novi-form').addEventListener('submit',async ev=>{ev.preventDefault();
+  const v=$('n-vrsta').value.trim(),c=parseNum($('n-cijena').value),od=$('n-od').value;
+  if(!v)return pmsg('n-msg','err','Upišite naziv.');
+  if(KAT.has(keyOf(v)))return pmsg('n-msg','err','Ta vrsta već postoji. Koristite korekciju cijene.');
+  if(c==null||Number.isNaN(c)||c<0)return pmsg('n-msg','err','Upišite cijenu, npr. 9,50.');
+  if(!od)return pmsg('n-msg','err','Upišite datum od kojeg cijena vrijedi.');
+  const doc={vrsta:v,lot:$('n-lot').value.trim(),jm:$('n-jm').value.trim()||'kom',kv:$('n-kv').value.trim()||'I',novi:true,cijene:[{od,cijena:c}],updatedAt:new Date().toISOString()};
+  try{await writeCorr(keyOf(v),doc);pmsg('n-msg','ok',`Dodano: ${v}, ${nf.format(c)} € od ${fmtDate(od)}`);['n-vrsta','n-lot','n-cijena'].forEach(i=>$(i).value='')}
+  catch(err){pmsg('n-msg','err','Spremanje nije uspjelo. Pokušajte ponovno.')}
+});
+let armed=null;
+const histOpen=new Set();
+function renderPricing(){
+  const q=$('c-q').value.trim().toLowerCase(),d=$('c-dan').value||todayISO();
+  const all=[...KAT.values()];
+  const rows=all.filter(e=>!q||(e.vrsta+' '+e.lot).toLowerCase().includes(q));
+  $('c-count').textContent=`${rows.length} / ${all.length} vrsta · ${CORR.size} s korekcijom`;
+  let h='<thead><tr><th style="min-width:200px">Vrsta</th><th>LOT</th><th>JM</th><th>Kvaliteta</th><th style="text-align:right">Cijena na dan</th><th>Vrijedi od</th><th></th></tr></thead><tbody>';
+  for(const e of rows){const p=priceOn(e,d),k=keyOf(e.vrsta);
+    h+=`<tr><td><button class="vlink" data-pick="${esc(e.vrsta)}" title="Korigiraj cijenu">${esc(e.vrsta)}</button>${e.novi?'<span class="tag">novi</span>':''}</td><td class="mono" style="white-space:nowrap">${esc(e.lot||'—')}</td><td>${esc(e.jm)}</td><td>${esc(e.kv||'I')}</td>
+      <td class="sv" style="text-align:right">${p?nf.format(p.cijena):'—'}</td><td class="mono" style="white-space:nowrap">${p?fmtDate(p.od):'—'}</td>
+      <td>${e.hist.length>1?`<button class="vlink" data-hx="${esc(k)}" style="font-size:12px;color:var(--muted)">${histOpen.has(k)?'sakrij':'sve cijene ('+e.hist.length+')'}</button>`:''}</td></tr>`;
+    if(e.hist.length>1&&histOpen.has(k))for(const x of e.hist.slice().reverse())h+=`<tr style="font-size:13px"><td style="padding-left:28px;color:var(--muted)">${x.izvor==='excel'?'iz Excela':'korekcija'}</td><td></td><td></td><td></td>
+      <td class="sv" style="text-align:right;color:var(--muted)">${nf.format(x.cijena)}</td><td class="mono" style="color:var(--muted)">${fmtDate(x.od)}</td>
+      <td>${x.izvor==='korekcija'?`<button class="btn sm danger" data-del="${esc(k)}|${x.od}">${armed===k+'|'+x.od?'Ukloni?':'Ukloni korekciju'}</button>`:''}</td></tr>`}
+  $('c-table').innerHTML=h+'</tbody>';
+  $('c-table').querySelectorAll('[data-hx]').forEach(b=>b.onclick=()=>{const k=b.dataset.hx;histOpen.has(k)?histOpen.delete(k):histOpen.add(k);renderPricing()});
+  $('c-table').querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{setPrForms(true);$('k-vrsta').value=b.dataset.pick;updKCur();$('k-cijena').focus();$('kor-form').scrollIntoView({behavior:'smooth',block:'nearest'})});
+  $('c-table').querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{
+    const v=b.dataset.del;if(armed!==v){armed=v;renderPricing();return}
+    armed=null;const [k,od]=v.split('|');const c=CORR.get(k);if(!c)return;
+    const cij=(c.cijene||[]).filter(x=>x.od!==od);
+    try{await writeCorr(k,cij.length?{...c,cijene:cij,updatedAt:new Date().toISOString()}:null)}catch(err){pmsg('k-msg','err','Uklanjanje nije uspjelo.')}
+    renderPricing()});
+}
+$('c-q').oninput=renderPricing;$('c-dan').oninput=renderPricing;
+
+/* ---------- boot ---------- */
+draft=emptyBlock();emptyBlockStable=clone(draft);fillEditor();renderList();
+/* ---------- KPR ---------- */
+let curTab='blokovi',kprYear=null,kprMode=null,kprEdit=null,kprArmed=null;
+const r2=x=>Math.round((+x||0)*100)/100;
+const negf=x=>{const v=-r2(x);return nf.format(v===0?0:v)};
+const money=x=>{const v=r2(x);return `<span class="${v<0?'neg':''}">${nf.format(v)}</span>`};
+function kprData(){if(!store.kpr||typeof store.kpr!=='object')store.kpr={};const k=store.kpr;if(!k.unosi||typeof k.unosi!=='object')k.unosi={};if(!Array.isArray(k.povijest))k.povijest=[];return k}
+const yOf=u=>+String(u.datum).slice(0,4);
+function mrkId(){const K=kupciMap();return Object.keys(K).find(i=>String(K[i].naziv||'').trim().toLowerCase()==='mrkvica d.o.o.')||'k-mrkvica'}
+const kOf=u=>u.kupac||mrkId();
+let kprKupac=null;
+const curK=()=>{const K=kupciMap();if(!kprKupac||!K[kprKupac])kprKupac=mrkId();return kprKupac};
+function kprListK(){const k=curK();return kprList().filter(u=>kOf(u)===k)}
+function kprList(){return Object.entries(kprData().unosi).filter(([,u])=>u&&u.datum).map(([id,u])=>({id,...u})).sort((a,b)=>(yOf(a)-yOf(b))||((a.red??1e12)-(b.red??1e12))||String(a.datum).localeCompare(String(b.datum)))}
+const kprNextRed=()=>Math.max(0,...Object.values(kprData().unosi).map(u=>+u.red||0))+1;
+function kprSyncBlock(data,old){
+  const U=kprData().unosi,k=findKupac(data.kupac);
+  if(!k){delete U['b'+data.broj];if(old)delete U['b'+old];return}
+  if(old&&old!==data.broj&&U['b'+old]){U['b'+data.broj]={...U['b'+old],broj:data.broj};delete U['b'+old]}
+  const id='b'+data.broj,t=r2(total(data));
+  if(U[id]){U[id].iznos=t;U[id].kupac=k.id;if(data.datum)U[id].datum=data.datum}
+  else U[id]={tip:'blok',datum:data.datum||todayISO(),broj:data.broj,iznos:t,red:kprNextRed(),kupac:k.id};
+}
+function kprYearsRows(){
+  const pov=new Map(curK()===mrkId()?kprData().povijest.map(p=>[p[0],p]):[]);
+  const byY=new Map();for(const u of kprListK()){if(u.iskljuceno)continue;const y=yOf(u);const o=byY.get(y)||{e:0,f:0};if(u.tip==='blok')o.e+=+u.iznos||0;else o.f+=+u.iznos||0;byY.set(y,o)}
+  const izv=curK()===mrkId()?((A.kpr&&A.kpr.izvori)||{}):{};
+  const rows=[];let cum=0;
+  for(const y of [...new Set([...pov.keys(),...byY.keys()])].sort((a,b)=>a-b)){
+    if(byY.has(y)){const o=byY.get(y),s=o.f-o.e;cum+=s;const p=pov.get(y);
+      const chk=p?(Math.abs(r2(p[1])-r2(o.e))<0.005&&Math.abs(r2(p[2])-r2(o.f))<0.005?'ok':{e:p[1],f:p[2]}):null;
+      rows.push({g:y,e:o.e,f:o.f,s,u:cum,src:(izv[y]?izv[y]+' · ':'')+'pojedinačni unosi',chk})}
+    else{const p=pov.get(y);cum+=p[3];rows.push({g:y,e:p[1],f:p[2],s:p[3],u:cum,src:'samo godišnji zbroj iz Excela',chk:null})}}
+  return rows;
+}
+const kprMissingYears=()=>{if(curK()!==mrkId())return [];const have=new Set(kprListK().map(yOf));return [...new Set(A.kpr.unosi.map(x=>+x.datum.slice(0,4)))].filter(y=>!have.has(y)).sort()};
+function showTab(t){curTab=t;['blokovi','kpr','cijene','kupci'].forEach(x=>$('t-'+x).setAttribute('aria-selected',x===t));
+  $('app').hidden=t!=='blokovi';$('kpr').hidden=t!=='kpr';$('cijene-sec').hidden=t!=='cijene';$('kupci-sec').hidden=t!=='kupci';if(t==='cijene')openPricing();if(t==='kpr')renderKpr();if(t==='kupci')renderKupci();if(t==='blokovi')updKupacInfo()}
+$('t-cijene').onclick=()=>{if(dirty()&&curTab==='blokovi'){showMsg('err','Prvo spremite ili odbacite izmjene bloka.');return}showTab('cijene')};
+$('t-kupci').onclick=()=>{if(dirty()&&curTab==='blokovi'){showMsg('err','Prvo spremite ili odbacite izmjene bloka.');return}showTab('kupci')};
+$('t-blokovi').onclick=()=>showTab('blokovi');
+$('t-kpr').onclick=()=>{if(dirty()&&curTab==='blokovi'){showMsg('err','Prvo spremite ili odbacite izmjene bloka.');return}showTab('kpr')};
+function renderKpr(){
+  const all=kprListK(),years=kprYearsRows();
+  {const K=kupciMap(),c=new Map();for(const u of kprList()){const k=kOf(u);c.set(k,(c.get(k)||0)+1)}
+   const ids=Object.keys(K).filter(i=>K[i]&&K[i].naziv).sort((a,b)=>(a===mrkId()?-1:b===mrkId()?1:K[a].naziv.localeCompare(K[b].naziv,'hr')));
+   $('kpr-kupci').innerHTML='<b>Kupac</b>'+ids.map(i=>`<button class="pc" data-kk="${esc(i)}" aria-pressed="${i===curK()}">${esc(K[i].naziv)}<small>${c.get(i)||0}</small></button>`).join('');
+   $('kpr-kupci').querySelectorAll('[data-kk]').forEach(b=>b.onclick=()=>{kprKupac=b.dataset.kk;kprYear=null;kprArmed=null;$('kpr-form').hidden=true;kmsg('','');renderKpr()});}
+  const ys=[...new Set(all.map(u=>+String(u.datum).slice(0,4)))].sort((a,b)=>b-a);
+  if(!ys.length)ys.push(new Date().getFullYear());
+  if(!kprYear||!ys.includes(kprYear))kprYear=ys[0];
+  $('kpr-god').innerHTML=ys.map(y=>`<option${y===kprYear?' selected':''}>${y}</option>`).join('');
+  // pregled po godinama
+  let h='<thead><tr><th>Godina</th><th class="num">Potražuje €</th><th class="num">Uplata €</th><th class="num">Saldo po godini €</th><th class="num">Ukupno €</th><th>Izvor</th><th>Provjera sa zbrojem u Excelu</th></tr></thead><tbody>';
+  let se=0,sf=0,ss=0;
+  for(const r of years){se+=r.e;sf+=r.f;ss+=r.s;h+=`<tr class="${r.g===kprYear?'sel':''}"><td class="mono">${r.g}.</td><td class="num">${negf(r.e)}</td><td class="num">${nf.format(r2(r.f))}</td><td class="num">${money(r.s)}</td><td class="num"><b>${money(r.u)}</b></td><td style="color:var(--muted);font-size:12px">${esc(r.src)}</td><td style="font-size:12px">${r.chk==='ok'?'<span class="okc">✓ poklapa se</span>':r.chk?`<span class="neg">Excel: ${nf.format(r.chk.e)} / ${nf.format(r.chk.f)}</span>`:'<span style="color:var(--muted)">—</span>'}</td></tr>`}
+  const last=years.length?years[years.length-1].u:0;
+  h+=`</tbody><tfoot><tr><td>Ukupno</td><td class="num">${negf(se)}</td><td class="num">${nf.format(r2(sf))}</td><td class="num">${money(ss)}</td><td class="num">${money(last)}</td><td></td><td></td></tr></tfoot>`;
+  $('kpr-years').innerHTML=h;
+  // godina
+  const yr=all.filter(u=>yOf(u)===kprYear),yrA=yr.filter(u=>!u.iskljuceno);
+  $('kpr-title').textContent=`KPR ${kprYear}. · ${(kupciMap()[curK()]||{}).naziv||''}`;
+  let run=0;const withH=yr.map(u=>{if(!u.iskljuceno)run=r2(run+(u.tip==='blok'?-(+u.iznos||0):(+u.iznos||0)));return {...u,h:run}});
+  const E=yrA.filter(u=>u.tip==='blok').reduce((a,u)=>a+(+u.iznos||0),0),Fu=yrA.filter(u=>u.tip!=='blok').reduce((a,u)=>a+(+u.iznos||0),0);
+  const yrow=years.find(r=>r.g===kprYear);
+  const chk=u=>{if(u.tip!=='blok'||u.iskljuceno)return null;const b=blocks.get(String(u.broj));if(!b)return 'nema';const t=r2(total(b));return Math.abs(t-r2(u.iznos))<0.005?'ok':t};
+  const raz=withH.filter(u=>{const c=chk(u);return c!==null&&c!=='ok'&&c!=='nema'}).length;
+  $('kpr-stats').innerHTML=[[negf(E)+' €','potražuje'],[nf.format(r2(Fu))+' €','uplate i ispravci'],[money(Fu-E)+' €','saldo godine'],[(yrow?money(yrow.u):'—')+' €','ukupno s prethodnim godinama'],[yrA.filter(u=>u.tip==='blok').length,'blokova'],[raz?`<span class="neg">${raz}</span>`:'<span class="okc">0</span>','razlika s blokovima']].map(([b,s])=>`<div class="kstat"><b>${b}</b><span>${s}</span></div>`).join('');
+  // filtar
+  const q=$('kpr-q').value.trim().toLowerCase(),f=$('kpr-f').value;
+  const rows=withH.filter(u=>{if(f==='blok'&&u.tip!=='blok')return false;if(f==='uplata'&&u.tip==='blok')return false;if(f==='raz'){const c=chk(u);if(c===null||c==='ok'||c==='nema')return false}
+    if(q){const s=[u.broj,fmtDate(u.datum),nf.format(r2(u.iznos)),u.napomena].join(' ').toLowerCase();if(!s.includes(q))return false}return true});
+  $('kpr-empty').hidden=!!all.length;
+  {const isM=curK()===mrkId();$('kpr-imp').hidden=!isM;$('kpr-empty').querySelector('span').textContent=isM?'Još nema KPR unosa. Uvezite KPR iz Excela (KPR Detaljno 23, 24, 25 i KPR DT. 26) ili dodajte prvu uplatu. Svaki spremljeni otkupni blok sam se upisuje u KPR.':'Još nema KPR unosa za ovog kupca. Svaki spremljeni otkupni blok ovog kupca sam se upisuje u njegov KPR, a uplate dodajete tipkom „+ Uplata”.'}
+  const miss=kprMissingYears();$('kpr-imp2').hidden=!all.length||!miss.length;$('kpr-imp2').textContent=`Uvezi iz Excela: ${miss.map(y=>y+'.').join(', ')}`;
+  let t='<thead><tr><th>Datum</th><th>Br. bloka</th><th class="num">Potražuje €</th><th class="num">Uplata €</th><th class="num">Ukupno €</th><th>Provjera s blokom</th><th>Napomena</th><th></th></tr></thead><tbody>';
+  let lastM=-1;
+  for(const u of rows){const m=+String(u.datum).slice(5,7);
+    if(!q&&!f&&m!==lastM){const mu=withH.filter(x=>+String(x.datum).slice(5,7)===m&&!x.iskljuceno);const me=mu.filter(x=>x.tip==='blok').reduce((a,x)=>a+(+x.iznos||0),0),mf=mu.filter(x=>x.tip!=='blok').reduce((a,x)=>a+(+x.iznos||0),0);
+      t+=`<tr class="mon"><td colspan="8">${MJESECI[m-1]||''} ${kprYear}. · potraživanja ${negf(me)} € · uplate ${nf.format(r2(mf))} €</td></tr>`;lastM=m}
+    const c=chk(u);
+    const prov=c===null?'':c==='ok'?'<span class="okc">✓ odgovara bloku</span>':c==='nema'?'<span style="color:var(--muted)">blok nije u aplikaciji</span>':`<span class="neg">blok: ${nf.format(c)} €</span> <button class="btn sm" data-sync="${esc(u.id)}">Uskladi s blokom</button>`;
+    const act=u.tip==='blok'?'':`<span style="display:inline-flex;gap:4px"><button class="btn sm" data-edit="${esc(u.id)}" aria-label="Uredi">Uredi</button><button class="btn sm danger" data-del="${esc(u.id)}">${kprArmed===u.id?'Obriši?':'✕'}</button></span>`;
+    t+=`<tr${u.iskljuceno?' style="opacity:.55" title="Ne ulazi u zbroj"':''}><td class="mono">${fmtDate(u.datum)}</td><td>${u.tip==='blok'?`<button class="vlink mono" data-blk="${esc(u.broj)}" title="Otvori otkupni blok">${esc(u.broj)}</button>`:''}</td>
+      <td class="num">${u.tip==='blok'?(u.iskljuceno?`<s>${negf(u.iznos)}</s>`:negf(u.iznos)):''}</td><td class="num">${u.tip!=='blok'?money(u.iznos):''}</td><td class="num"><b>${money(u.h)}</b></td>
+      <td>${prov}</td><td><input class="nap" data-nap="${esc(u.id)}" value="${esc(u.napomena||'')}" placeholder="${u.tip==='ispravak'?'Ispravak – dodaj napomenu…':'Dodaj napomenu…'}" aria-label="Napomena za ${u.tip==='blok'?'blok '+esc(u.broj):fmtDate(u.datum)}" autocomplete="off"></td><td>${act}</td></tr>`}
+  if(!rows.length&&all.length)t+='<tr><td colspan="8" style="color:var(--muted);padding:14px">Nema unosa za odabrani prikaz.</td></tr>';
+  $('kpr-table').innerHTML=t+'</tbody>';
+  const T=$('kpr-table');
+  T.querySelectorAll('[data-blk]').forEach(b=>b.onclick=()=>{const n=b.dataset.blk;if(blocks.has(n))select(n);else kmsg('err',`Blok ${n} nije u popisu otkupnih blokova.`)});
+  T.querySelectorAll('[data-sync]').forEach(b=>b.onclick=async()=>{const u=kprData().unosi[b.dataset.sync];const bl=blocks.get(String(u.broj));if(!bl)return;const old=u.iznos;u.iznos=r2(total(bl));
+    try{await persist();kmsg('ok',`Blok ${u.broj}: iznos u KPR-u promijenjen s ${nf.format(old)} na ${nf.format(u.iznos)} €.`)}catch(e){u.iznos=old;kmsg('err','Spremanje nije uspjelo.')}renderKpr()});
+  T.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{const id=b.dataset.del;if(kprArmed!==id){kprArmed=id;renderKpr();return}kprArmed=null;const U=kprData().unosi,old=U[id];delete U[id];
+    try{await persist();kmsg('ok','Unos obrisan.')}catch(e){U[id]=old;kmsg('err','Brisanje nije uspjelo.')}renderKpr()});
+  T.querySelectorAll('input[data-nap]').forEach(inp=>{
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();inp.blur()}else if(e.key==='Escape'){const u=kprData().unosi[inp.dataset.nap];inp.value=(u&&u.napomena)||'';inp.blur()}});
+    inp.addEventListener('change',async()=>{const u=kprData().unosi[inp.dataset.nap];if(!u)return;const old=u.napomena||'',nv=inp.value.trim();if(nv===old)return;
+      u.napomena=nv;try{await persist();inp.value=nv;kmsg('ok',u.tip==='blok'?`Napomena za blok ${u.broj} spremljena.`:'Napomena spremljena.')}
+      catch(e){u.napomena=old;inp.value=old;kmsg('err','Spremanje napomene nije uspjelo.')}});
+  });
+  T.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{const u=kprData().unosi[b.dataset.edit];openKprForm(u.tip,b.dataset.edit)});
+}
+const kmsg=(t,s)=>{$('kpr-msg').innerHTML=s?`<span class="msg ${t}">${esc(s)}</span>`:''};
+function openKprForm(tip,editId){
+  kprMode=tip;kprEdit=editId||null;const u=editId?kprData().unosi[editId]:null;
+  $('kpr-form').hidden=false;$('kf-iznos-l').textContent=tip==='ispravak'?'Iznos ispravka € (minus smanjuje stanje)':'Iznos uplate €';
+  $('kf-datum').value=u?u.datum:todayISO();$('kf-iznos').value=u?nfi.format(u.iznos):'';$('kf-nap').value=u?(u.napomena||''):'';
+  $('kf-save').textContent=editId?'Spremi izmjenu':tip==='ispravak'?'Dodaj ispravak':'Dodaj uplatu';$('kf-iznos').focus();
+}
+$('kpr-add-u').onclick=()=>openKprForm('uplata');$('kpr-add-i').onclick=()=>openKprForm('ispravak');
+$('kf-cancel').onclick=()=>{$('kpr-form').hidden=true;kprEdit=null};
+$('kpr-form').addEventListener('submit',async ev=>{ev.preventDefault();
+  const d=$('kf-datum').value,n=parseNum($('kf-iznos').value);
+  if(!d)return kmsg('err','Upišite datum.');
+  if(n==null||Number.isNaN(n)||n===0)return kmsg('err','Upišite iznos, npr. 1.119,03.');
+  if(kprMode==='uplata'&&n<0)return kmsg('err','Uplata ne može biti negativna. Za umanjenje koristite ispravak.');
+  const U=kprData().unosi,id=kprEdit||('u'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),old=U[id];
+  U[id]={...(old||{}),tip:kprMode,datum:d,iznos:r2(n),napomena:$('kf-nap').value.trim(),red:old?old.red:kprNextRed(),kupac:old?kOf(old):curK()};
+  try{await persist();$('kpr-form').hidden=true;kprEdit=null;kprYear=+d.slice(0,4);kmsg('ok',kprMode==='ispravak'?'Ispravak spremljen.':'Uplata spremljena.');renderKpr()}
+  catch(e){if(old)U[id]=old;else delete U[id];kmsg('err','Spremanje nije uspjelo.')}
+});
+$('kpr-god').onchange=e=>{kprYear=+e.target.value;renderKpr()};
+$('kpr-q').oninput=renderKpr;$('kpr-f').onchange=renderKpr;
+async function kprImport(){
+  const K=kprData(),U=K.unosi,miss=new Set(kprMissingYears());let nb=0,nu=0;
+  if(!K.povijest.length)K.povijest=A.kpr.povijest.map(p=>p.slice());
+  for(const x of A.kpr.unosi){const y=x.datum.slice(0,4);if(!miss.has(+y))continue;
+    if(x.tip==='blok'){const id='b'+x.broj;if(U[id])continue;U[id]={tip:'blok',datum:x.datum,broj:x.broj,iznos:x.iznos,red:x.red,kupac:mrkId()};if(x.iskljuceno)U[id].iskljuceno=true;if(x.napomena)U[id].napomena=x.napomena;nb++}
+    else{const s=x.tip==='ispravak'?'i':'u',id=y==='2026'?`x${x.red}${s}`:`x${y}-${x.red}${s}`;if(U[id])continue;U[id]={kupac:mrkId(),tip:x.tip,datum:x.datum,iznos:x.iznos,napomena:x.napomena||'',red:x.tip==='ispravak'?x.red+0.5:x.red};nu++}}
+  try{await persist();kmsg('ok',`Uvezeno ${[...miss].map(y=>y+'.').join(', ')}: ${nb} blokova, ${nu} uplata i ispravaka.`)}catch(e){kmsg('err','Spremanje nije uspjelo.')}
+  renderKpr();
+}
+$('kpr-imp').onclick=kprImport;$('kpr-imp2').onclick=kprImport;
+
+/* ---------- lokalna datoteka ---------- */
+const FILE='mrkvica-otkupni-blokovi.json',BKDIR='Sigurnosne kopije',KEEP=60;
+let dirH=null,chain=Promise.resolve(),lastSaved=null,backupDay=null;
+const APP_VERSION='1.14.0',APP_DATE='28.10.2026.',SCHEMA=1;
+let store={verzija:SCHEMA,blokovi:{},cjenik:{}};
+let readOnly=false;
+function idb(){return new Promise((res,rej)=>{const r=indexedDB.open('mrkvica-otkup',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function kvGet(k){try{const d=await idb();return await new Promise(res=>{const q=d.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>res(q.result||null);q.onerror=()=>res(null)})}catch(e){return null}}
+async function kvSet(k,v){try{const d=await idb();await new Promise(res=>{const tx=d.transaction('kv','readwrite');tx.objectStore('kv').put(v,k);tx.oncomplete=res;tx.onerror=res})}catch(e){}}
+async function writeFile(dir,name,text){const fh=await dir.getFileHandle(name,{create:true});const w=await fh.createWritable();await w.write(text);await w.close()}
+async function backup(){
+  const day=todayISO();if(backupDay===day)return;
+  let txt=null;try{txt=await (await (await dirH.getFileHandle(FILE)).getFile()).text()}catch(e){}
+  if(txt){const bd=await dirH.getDirectoryHandle(BKDIR,{create:true});const name=`mrkvica-otkupni-blokovi-${day}.json`;
+    let has=true;try{await bd.getFileHandle(name)}catch(e){has=false}
+    if(!has)await writeFile(bd,name,txt);
+    const names=[];for await(const [n,h] of bd.entries()){if(h.kind==='file'&&/^mrkvica-otkupni-blokovi-\d{4}-\d\d-\d\d\.json$/.test(n))names.push(n)}
+    names.sort();while(names.length>KEEP)await bd.removeEntry(names.shift())}
+  backupDay=day;
+}
+async function doWrite(){
+  if(readOnly){setStatus(true);throw new Error('readonly')}
+  try{store.verzija=Math.max(+store.verzija||0,SCHEMA);store.aplikacija={verzija:APP_VERSION,datum:APP_DATE};store.spremljeno=new Date().toISOString();await backup();await writeFile(dirH,FILE,JSON.stringify(store,null,1));lastSaved=new Date();setStatus()}
+  catch(e){setStatus(true);throw e}
+}
+function persist(){const p=chain.then(doWrite);chain=p.catch(()=>{});return p}
+const fakeCol=name=>({doc:id=>({
+  set:async d=>{store[name][id]=JSON.parse(JSON.stringify(d));await persist()},
+  delete:async()=>{delete store[name][id];await persist()}})});
+function setStatus(err){
+  const s=$('store-status');s.hidden=!dirH;s.classList.toggle('err',!!err);
+  $('st-txt').textContent=readOnly?`Samo pregled: podatke je spremila novija verzija aplikacije. Instalirajte najnoviju verziju da biste mogli spremati.`:err?'Spremanje u datoteku nije uspjelo. Provjerite je li mapa dostupna.':
+    `Podaci: ${dirH?dirH.name:''}\\${FILE}`+(lastSaved?` · spremljeno ${lastSaved.toLocaleTimeString('hr-HR',{hour:'2-digit',minute:'2-digit'})}`:'');
+}
+const gateText=s=>$('gate-text').textContent=s;
+const gErr=s=>{$('g-err').hidden=!s;$('g-err-t').textContent=s||''};
+/* Čuva SVA polja iz datoteke, i ona koja ova verzija ne poznaje, da nadogradnja ili povratak na stariju verziju ništa ne izgubi. */
+function migrate(d){
+  d=d&&typeof d==='object'?d:{};
+  if(!d.blokovi||typeof d.blokovi!=='object')d.blokovi={};
+  if(!d.cjenik||typeof d.cjenik!=='object')d.cjenik={};
+  if(!d.verzija)d.verzija=1;
+  if(!d.kupci||typeof d.kupci!=='object')d.kupci=JSON.parse(JSON.stringify(A.kupci));
+  /* buduće promjene strukture dodaju se ovdje, korak po korak (1 -> 2 -> ...), nikad brisanjem podataka */
+  return d;
+}
+/* osnovni podaci (cjenik iz Excela, zadani kupac/prodavatelj, izvori KPR) čuvaju se u datoteci s podacima, ne u aplikaciji */
+function applyOsnova(o){
+  o=o||{};setBase(o.katalog||A.katalog);
+  if(o.izvori){A.kpr=A.kpr||{};A.kpr.izvori=o.izvori}
+  if(o.def)for(const [k,v] of Object.entries(o.def))if(v)DEF[k]=v;
+  try{const bar=$('osnova-bar');if(bar)bar.hidden=!!(o.katalog&&o.katalog.length)||!!A.katalog.length}catch(e){}
+}
+function loadStore(d){
+  store=migrate(d?JSON.parse(JSON.stringify(d)):null);
+  if(!store.osnova&&A.katalog.length)store.osnova={katalog:A.katalog,izvori:(A.kpr&&A.kpr.izvori)||{},povijest:(A.kpr&&A.kpr.povijest)||[],def:{...DEF}};
+  applyOsnova(store.osnova);
+  blocks.clear();for(const [id,b] of Object.entries(store.blokovi))if(b)blocks.set(id,{...b,broj:b.broj||id});
+  CORR.clear();for(const c of Object.values(store.cjenik))if(c&&c.vrsta)CORR.set(keyOf(c.vrsta),c);
+}
+/* jednokratne ispravke podataka (svaka se izvrši samo jednom) */
+function runMigrations(){
+  const M=Array.isArray(store.migracije)?store.migracije:[];let ch=false;
+  if(!M.includes('uvoz-excel-pocetni')){
+    /* nova (prazna) baza: odmah učitaj sve blokove i Mrkvica KPR iz Excela */
+    if(!store.blokovi)store.blokovi={};
+    if(!Object.keys(store.blokovi).some(k=>k!=='23-ZG-001'))
+      for(const b of A.uvoz)if(!store.blokovi[b.broj])store.blokovi[b.broj]=JSON.parse(JSON.stringify({...b,updatedAt:new Date().toISOString()}));
+    if(!store.kpr)store.kpr={unosi:{},povijest:[]};if(!store.kpr.unosi)store.kpr.unosi={};if(!Array.isArray(store.kpr.povijest))store.kpr.povijest=[];
+    const U=store.kpr.unosi,mid=mrkId();
+    if(!Object.values(U).some(u=>u&&(u.kupac||mid)===mid)){
+      if(!store.kpr.povijest.length)store.kpr.povijest=A.kpr.povijest.map(p=>p.slice());
+      for(const x of A.kpr.unosi){const y=x.datum.slice(0,4);
+        if(x.tip==='blok'){const id='b'+x.broj;if(U[id])continue;U[id]={tip:'blok',datum:x.datum,broj:x.broj,iznos:x.iznos,red:x.red,kupac:mid};if(x.iskljuceno)U[id].iskljuceno=true;if(x.napomena)U[id].napomena=x.napomena}
+        else{const s=x.tip==='ispravak'?'i':'u',id=y==='2026'?`x${x.red}${s}`:`x${y}-${x.red}${s}`;if(U[id])continue;U[id]={kupac:mid,tip:x.tip,datum:x.datum,iznos:x.iznos,napomena:x.napomena||'',red:x.tip==='ispravak'?x.red+0.5:x.red}}}
+      const u=U.b2026005,bl=store.blokovi['2026005'];
+      if(u&&bl&&Math.abs((+u.iznos||0)-766.5)<0.005&&Math.abs(Math.round(total(bl)*100)/100-766.1)<0.005){u.iznos=766.1;if(!/Usklađeno s blokom/.test(u.napomena||''))u.napomena=(u.napomena?u.napomena+' · ':'')+'Usklađeno s blokom (u Excelu 766,50 €)'}}
+    M.push('uvoz-excel-pocetni');ch=true}
+  if(!M.includes('kpr-2026005-uskladi')){
+    const u=store.kpr&&store.kpr.unosi&&store.kpr.unosi.b2026005,bl=store.blokovi&&store.blokovi['2026005'];
+    if(u&&bl&&Math.abs((+u.iznos||0)-766.5)<0.005&&Math.abs(Math.round(total(bl)*100)/100-766.1)<0.005){
+      u.iznos=766.1;if(!/Usklađeno s blokom/.test(u.napomena||''))u.napomena=(u.napomena?u.napomena+' · ':'')+'Usklađeno s blokom (u Excelu 766,50 €)'}
+    M.push('kpr-2026005-uskladi');ch=true}
+  if(!M.includes('kupac-zrin-green')){
+    const OLD='Zrin Grin j.d.o.o.',NEW='Zrin Green j.d.o.o.';
+    for(const k of Object.values(store.kupci||{}))if(k&&k.naziv===OLD)k.naziv=NEW;
+    for(const b of Object.values(store.blokovi||{}))if(b&&String(b.kupac||'').trim()===OLD)b.kupac=NEW;
+    M.push('kupac-zrin-green');ch=true}
+  if(!M.includes('zrin-green-excel')){
+    if(!store.kupci)store.kupci={};const K=store.kupci;
+    const id=Object.keys(K).find(i=>/^zrin gr(e|i)en/i.test(String(K[i].naziv||'')))||'k-zrin-grin';
+    K[id]={...(K[id]||{}),...((A.kupci||{})['k-zrin-grin']||{}),mbs:(K[id]&&K[id].mbs)||'',zadani:!!(K[id]&&K[id].zadani)};
+    {const os=((A.kupci||{})['k-mrkvica']||{}).osoba;if(os)for(const k of Object.values(K))if(k&&k.naziv==='Mrkvica d.o.o.'&&!k.osoba)k.osoba=os}
+    const zb=A.zgBlok;if(zb&&!store.blokovi[zb.broj])store.blokovi[zb.broj]=JSON.parse(JSON.stringify({...zb,updatedAt:new Date().toISOString()}));
+    M.push('zrin-green-excel');ch=true}
+  if(!M.includes('kpr-po-kupcima')){
+    const U=(store.kpr&&store.kpr.unosi)||{};const mid=mrkId();
+    for(const u of Object.values(U))if(u&&!u.kupac)u.kupac=mid;
+    for(const b of Object.values(store.blokovi||{})){const k=findKupac(b&&b.kupac);if(!k||k.id===mid||U['b'+b.broj])continue;
+      if(!store.kpr)store.kpr={unosi:{},povijest:[]};if(!store.kpr.unosi)store.kpr.unosi={};
+      store.kpr.unosi['b'+b.broj]={tip:'blok',datum:b.datum||todayISO(),broj:b.broj,iznos:Math.round(total(b)*100)/100,red:Math.max(0,...Object.values(store.kpr.unosi).map(x=>+x.red||0))+1,kupac:k.id}}
+    M.push('kpr-po-kupcima');ch=true}
+  if(ch)store.migracije=M;return ch;
+}
+async function connect(h){
+  let txt=null;
+  try{txt=await (await (await h.getFileHandle(FILE)).getFile()).text()}catch(e){if(e&&e.name!=='NotFoundError')throw e}
+  let d=null;
+  if(txt){try{d=JSON.parse(txt)}catch(e){gErr(`Datoteka ${FILE} u mapi ${h.name} je oštećena. Vratite zadnju ispravnu kopiju iz podmape „${BKDIR}“ (preimenujte je u ${FILE}).`);return}}
+  dirH=h;backupDay=null;lastSaved=null;loadStore(d);
+  readOnly=!!(d&&+d.verzija>SCHEMA);
+  if(!readOnly&&runMigrations())loadStore(JSON.parse(JSON.stringify(store)));
+  const prev=d&&d.aplikacija&&d.aplikacija.verzija;
+  if(txt&&!readOnly&&prev!==APP_VERSION){
+    try{const bd=await h.getDirectoryHandle(BKDIR,{create:true});const n=new Date(),z=x=>String(x).padStart(2,'0'),ts=`${n.getFullYear()}-${z(n.getMonth()+1)}-${z(n.getDate())}_${z(n.getHours())}${z(n.getMinutes())}`;
+      await writeFile(bd,`prije-nadogradnje-v${prev||'1.0'}-na-v${APP_VERSION}-${ts}.json`,txt)}catch(e){}
+  }
+  col=fakeCol('blokovi');catCol=fakeCol('cjenik');
+  if(!txt)await persist();
+  else if(!readOnly&&prev!==APP_VERSION){try{await persist()}catch(e){}}
+  rebuildKat();selected=null;draft=emptyBlock();emptyBlockStable=clone(draft);fillEditor();renderList();
+  $('gate').hidden=true;$('tabs').hidden=false;showTab(curTab);setStatus();gErr('');
+  await kvSet('dir',h);
+}
+async function pickDir(){
+  try{const h=await window.showDirectoryPicker({id:'mrkvica-podaci',mode:'readwrite',startIn:'documents'});await connect(h)}
+  catch(e){if(e&&e.name!=='AbortError'){$('gate').hidden=false;gErr('Mapu nije moguće otvoriti: '+(e.message||e))}}
+}
+$('g-pick').onclick=pickDir;
+$('ver').textContent=`verzija ${APP_VERSION} (${APP_DATE})`;
+$('st-change').onclick=()=>{if(dirty()){showMsg('err','Prvo spremite ili odbacite izmjene.');return}pickDir()};
+(async()=>{
+  if(!('showDirectoryPicker' in window)){gateText('Ovaj preglednik ne može spremati podatke u datoteku. Otvorite aplikaciju u Microsoft Edgeu ili Google Chromeu na računalu.');$('g-pick').hidden=true;return}
+  const h=await kvGet('dir');
+  if(!h){gateText('Prvo pokretanje: odaberite mapu u kojoj će se čuvati podaci, na primjer Dokumenti\\Mrkvica podaci.');return}
+  let perm='prompt';try{perm=await h.queryPermission({mode:'readwrite'})}catch(e){}
+  if(perm==='granted'){try{await connect(h);return}catch(e){}}
+  gateText(`Podaci su u mapi „${h.name}“. Kliknite „Otvori podatke“ i potvrdite pristup mapi.`);
+  $('g-open').hidden=false;$('g-open').textContent=`Otvori podatke (${h.name})`;
+  $('g-open').onclick=async()=>{try{if(await h.requestPermission({mode:'readwrite'})==='granted')await connect(h);else gErr('Pristup mapi nije odobren.')}catch(e){gErr('Mapa više nije dostupna. Odaberite je ponovno.')}};
+})();
+/* uvoz iz datoteke (izvoz iz online verzije ili sigurnosna kopija) */
+$('imp-file').onclick=()=>$('imp-input').click();
+$('osnova-btn').onclick=()=>$('imp-input').click();
+$('imp-input').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  let d;try{d=JSON.parse(await f.text())}catch(err){showMsg('err','Odabrana datoteka nije ispravan JSON.');return}
+  if(d&&d.osnova&&Array.isArray(d.osnova.katalog)){
+    store.osnova=d.osnova;applyOsnova(store.osnova);
+    try{await persist()}catch(err){showMsg('err','Spremanje u datoteku nije uspjelo.');return}
+    rebuildKat();draft=emptyBlock();emptyBlockStable=clone(draft);fillEditor();renderList();showMsg('ok',`Učitani osnovni podaci: ${d.osnova.katalog.length} vrsta proizvoda u cjeniku.`);
+    if(!d.blokovi)return}
+  const bl=d.blokovi||{},cj=d.cjenik||{};let nb=0,sk=0,nc=0;
+  for(const [id,b] of Object.entries(bl)){const k=String((b&&b.broj)||id);if(!b)continue;if(store.blokovi[k]){sk++;continue}store.blokovi[k]={...b,broj:k};nb++}
+  for(const c of Object.values(cj)){if(!c||!c.vrsta)continue;const id=docId(c.vrsta);const ex=store.cjenik[id];
+    if(!ex){store.cjenik[id]=c;nc+=(c.cijene||[]).length;continue}
+    const m=new Map((ex.cijene||[]).map(x=>[x.od,x]));for(const x of (c.cijene||[]))if(!m.has(x.od)){m.set(x.od,x);nc++}
+    store.cjenik[id]={...ex,cijene:[...m.values()].sort((a,b)=>a.od.localeCompare(b.od))}}
+  try{await persist()}catch(err){showMsg('err','Spremanje u datoteku nije uspjelo.');return}
+  loadStore(JSON.parse(JSON.stringify(store)));rebuildKat();renderList();
+  showMsg('ok',`Uvezeno ${nb} blokova i ${nc} cijena${sk?`, preskočeno ${sk} blokova koji već postoje`:''}.`);
+};
+window.addEventListener('beforeunload',e=>{if(dirty()){e.preventDefault();e.returnValue=''}});
+</script>
+
+<script>if(location.protocol==='https:'&&'serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
+</body>
+</html>
